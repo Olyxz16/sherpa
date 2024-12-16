@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Check, ChevronsUpDown } from 'lucide-vue-next'
-import { ref } from 'vue'
+import { ref, defineProps, defineEmits } from 'vue'
 
 const props = defineProps({
   options: [{
@@ -27,6 +27,11 @@ const props = defineProps({
   searchPlaceholder: String,
   defaultValue: String
 });
+
+const emit = defineEmits(['select']);
+function emitSelect(payload: string) {
+  emit('select', payload);
+}
 
 const open = ref(false)
 const value = ref(props.defaultValue)
@@ -62,6 +67,7 @@ const value = ref(props.defaultValue)
                   value = ev.detail.value
                 }
                 open = false
+                emitSelect(value);
               }"
             >
               {{ opt.label }}
