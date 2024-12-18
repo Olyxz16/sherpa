@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -41,15 +42,17 @@ func NewServer() *http.Server {
 func init() {
     var err error
 
-    host = os.Getenv("HOST")
-    port, err = strconv.Atoi(os.Getenv("PORT"))
+    host = strings.Trim(os.Getenv("HOST"), " ")
+    portStr := strings.Trim(os.Getenv("PORT"), " ")
+    port, err = strconv.Atoi(portStr)
     if err != nil {
         panic("Cannot parse port !")
     }
     
-    staticDir = os.Getenv("STATIC_DIR")
+    staticDir = strings.Trim(os.Getenv("STATIC_DIR"), " ")
+    isDebugMode := strings.Trim(os.Getenv("DEBUG"), " ")
     if staticDir == "" {
-        if os.Getenv("DEBUG") == "" {
+        if isDebugMode == "true" {
             slog.Warn("API MODE IS ACTIVE. Add --staticFilepath flag to serve static file")
         } else {
             panic("STATIC_DIR env is not set ! Cannot serve static files !")
