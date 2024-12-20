@@ -16,13 +16,14 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Check, ChevronsUpDown } from 'lucide-vue-next'
-import { ref, defineProps, defineEmits } from 'vue'
+import { ref, defineProps, defineEmits, type PropType } from 'vue'
+import type { Option } from '@/types/ComboBoxTypes'
 
 const props = defineProps({
-  options: [{
-    value: String,
-    label: String
-  }],
+  options: {
+    type: Array as PropType<Option[]>,
+    required: true
+  },
   placeholder: String,
   searchPlaceholder: String,
   defaultValue: String
@@ -66,6 +67,7 @@ const value = ref(props.defaultValue)
                 if (typeof ev.detail.value === 'string') {
                   value = ev.detail.value
                 }
+                value ??= ''
                 open = false
                 emitSelect(value);
               }"

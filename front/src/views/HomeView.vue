@@ -5,13 +5,15 @@ import FunctionBar from '../components/FunctionBar.vue'
 
 <template>
   <main>
-    <FunctionBar />
-    <EnvTextField />
+    <div id="home">
+      <FunctionBar />
+      <EnvTextField />
+    </div>
   </main>
 </template>
 
 <style scoped>
-main {
+#home {
   width: 50vw;
   height: 60vh;
 

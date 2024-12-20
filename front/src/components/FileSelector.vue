@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ComboBox } from '@/components/ui/combobox'
-import { useWorkstationStore } from '@/stores/workstationStore';
+import { useWorkstationStore } from '@/stores/workstationStore'
+import type { PropType } from 'vue'
+import type { Option } from '@/types/ComboBoxTypes'
 
-const options = [
+const options : Option[] = [
     { value: '.env', label: '.env' },
     { value: '.env.example', label: '.env.example' }
 ];
