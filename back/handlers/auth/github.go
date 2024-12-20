@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -29,19 +30,19 @@ type UserData struct {
 func AuthGithubLogin(c echo.Context) error {
     code := c.QueryParam("code")
     if code == "" {
-        fmt.Printf("erreur code\n")
+        slog.Error("Auth : missing code")
         return c.JSON(500, "{}")
     }
     
     auth, err := exchangeCode(code)
     if err != nil {
-        fmt.Printf("erreur échange code\n")
+        slog.Error(fmt.Sprintf("Auth : %v", err))
         return c.JSON(500, "{}")
     }
     
     data, err := getUserData(auth.Access_token)
     if err != nil {
-        fmt.Printf("erreur pour chopper la data\n")
+        slog.Error(fmt.Sprintf("Auth : %v", err))
         return c.JSON(500, "{}")
     }
     
@@ -54,7 +55,7 @@ func AuthGithubLogin(c echo.Context) error {
     response["repos"] = data.RepoNames
     respJson, err := json.Marshal(response)
     if err != nil {
-        fmt.Printf("erreur marshal json\n")
+        slog.Error(fmt.Sprintf("Auth : %v", err))
         return c.JSON(500, "{}")
     }
     
