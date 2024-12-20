@@ -1,5 +1,8 @@
 {
   "files": [],
+  "compilerOptions": {
+    "lib": ["dom", "es2016"]
+  },
   "references": [
     {
       "path": "./tsconfig.node.json"
