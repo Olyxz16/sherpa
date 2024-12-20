@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -50,6 +51,10 @@ func init() {
     }
     
     staticDir = strings.Trim(os.Getenv("STATIC_DIR"), " ")
+    staticDir, err = filepath.Abs(staticDir)
+    if err != nil {
+        panic("Error parsing filepath")
+    }
     isDebugMode := strings.Trim(os.Getenv("DEBUG"), " ")
     if staticDir == "" {
         if isDebugMode == "true" {
