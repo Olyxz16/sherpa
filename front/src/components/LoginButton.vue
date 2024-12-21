@@ -4,15 +4,15 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 </script>
 
 <template>
-  <div class="avatar rounded-full border border-input">
-    <p id="displayname"> Olyxz16 </p>
-    <button>
+  <button>
+    <div class="avatar rounded-full border border-input">
+      <p id="displayname"> Olyxz16 </p>
       <Avatar>
         <AvatarImage src="https://avatars.githubusercontent.com/u/60843442?s=96&v=4" />
         <AvatarFallback>CN</AvatarFallback>
       </Avatar>
-    </button>
-  </div>
+    </div>
+  </button>
 </template>
 
 <style scoped>
