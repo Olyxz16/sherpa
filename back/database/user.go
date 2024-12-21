@@ -6,6 +6,28 @@ type SherpaUser struct {
 }
 
 
+func AddUser(user SherpaUser) error {
+    db := dbInstance.db
+    q := `INSERT INTO SherpaUser
+        (uid)
+        VALUES ($1)`
+
+    tx, err := db.Begin()
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
+
+    _, err = tx.Exec(q, user.uid)
+    if err != nil {
+        return err
+    }
+
+    err = tx.Commit()
+    return err
+}
+
+
 func init() {
     migrateSherpaUser()
 }

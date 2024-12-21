@@ -17,12 +17,13 @@ import (
 
 
 type UserData struct {
+    UserID              int
     Username            string
     AvatarUrl           string
     RepoNames           []string
 }
 
-
+// TODO: properly handle errors
 func AuthGithubLogin(c echo.Context) error {
     code := c.QueryParam("code")
     if code == "" {
@@ -30,25 +31,33 @@ func AuthGithubLogin(c echo.Context) error {
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
-    
-    auth, err := exchangeCode(code)
+
+    auth, cookie, err := exchangeCode(code)
     if err != nil {
         slog.Error(fmt.Sprintf("Auth : %v", err))
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
     
-    data, err := getUserData(auth.Access_token)
+
+    data := &UserData{}
+    err = getUserName(auth.Access_token, data)
     if err != nil {
         slog.Error(fmt.Sprintf("Auth : %v", err))
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
-    fmt.Print(data)
+
+    auth.UserId = data.UserID
     
-    cookie := &http.Cookie{ Name: "session", Value: string(code) }
+    err = database.AddGithubUser(*auth)
+    if err != nil {
+        slog.Error(fmt.Sprintf("Auth : %v", err))
+        c.QueryParams().Add("autherr", "github")
+        return c.Redirect(302, "/")
+    }
+    
     http.SetCookie(c.Response(), cookie)
-    
     return c.Redirect(302, "/")
 }
 
@@ -86,7 +95,8 @@ func getUserName(access_token string, data *UserData) (error) {
 
     var result map[string]interface{}
     json.NewDecoder(resp.Body).Decode(&result)
-
+    
+    data.UserID = int(result["id"].(float64))
     data.Username = result["login"].(string)
     data.AvatarUrl = result["avatar_url"].(string)
     return nil
@@ -129,7 +139,7 @@ func getUserRepos(access_token string, data *UserData) (error) {
     return nil
 }
 
-func exchangeCode(code string) (database.GithubAuth, error) {
+func exchangeCode(code string) (*database.GithubAuth, *http.Cookie, error) {
     params := url.Values{}
     params.Set("client_id", os.Getenv("CLIENT_ID"))
     params.Set("client_secret", os.Getenv("CLIENT_SECRET"))
@@ -138,24 +148,30 @@ func exchangeCode(code string) (database.GithubAuth, error) {
     url := "https://github.com/login/oauth/access_token"
     req, err := http.NewRequest("POST", url, strings.NewReader(params.Encode()))
     if err != nil {
-        return database.GithubAuth{}, err
+        return nil, nil, err
     }
     req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
     req.Header.Add("Accept", "application/json")
     resp, err := http.DefaultClient.Do(req)
     if err != nil {
-        return database.GithubAuth{}, err
+        return nil, nil, err
+    }
+    
+    cookie, err := generateCookie()
+    if err != nil {
+        return nil, nil, err
     }
 
     var data map[string]interface{}
     json.NewDecoder(resp.Body).Decode(&data)
     expires_in := data["expires_in"].(float64)
     refresh_expires_in := data["refresh_token_expires_in"].(float64)
-    result := database.GithubAuth {
+    result := &database.GithubAuth {
+        Cookie: cookie.Value,
         Access_token: data["access_token"].(string),
         Refresh_token: data["refresh_token"].(string),
-        Expires_in: expires_in,
-        Refresh_expires_in: refresh_expires_in,
+        Expires_in: int(expires_in),
+        Refresh_expires_in: int(refresh_expires_in),
     }
-    return result, nil
+    return result, cookie, nil
 }

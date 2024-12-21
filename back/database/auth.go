@@ -5,14 +5,44 @@ type GithubAuth struct {
     Cookie              string
     Access_token        string
     Refresh_token       string
-    Expires_in          float64
-    Refresh_expires_in  float64
+    Expires_in          int
+    Refresh_expires_in  int
 }
 
 
 
 func AddGithubUser(auth GithubAuth) error {
-    return nil 
+    db := dbInstance.db
+    
+    user := SherpaUser{uid: auth.UserId}
+    err := AddUser(user)
+    if err != nil {
+        return err
+    }
+
+    q := `INSERT INTO GithubAuth
+        (cookie, access_token, expires_in, refresh_token, rt_expires_in, userId)
+        VALUES ($1, $2, $3, $4, $5, $6)
+    `
+    tx, err := db.Begin()
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
+
+    _, err = tx.Exec(q,
+        auth.Cookie, 
+        auth.Access_token, 
+        auth.Expires_in, 
+        auth.Refresh_token,
+        auth.Expires_in,
+        auth.UserId)
+    if err != nil {
+        return err
+    }
+
+    err = tx.Commit()
+    return err
 }
 
 
