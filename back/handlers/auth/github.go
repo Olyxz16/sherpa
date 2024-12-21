@@ -11,14 +11,10 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+
+	"github.com/Olyxz16/go-vue-template/database"
 )
 
-type UserAuth struct {
-    Access_token        string
-    Refresh_token       string
-    Expires_in          float64
-    Refresh_expires_in  float64
-}
 
 type UserData struct {
     Username            string
@@ -31,35 +27,29 @@ func AuthGithubLogin(c echo.Context) error {
     code := c.QueryParam("code")
     if code == "" {
         slog.Error("Auth : missing code")
-        return c.JSON(500, "{}")
+        c.QueryParams().Add("autherr", "github")
+        return c.Redirect(302, "/")
     }
     
     auth, err := exchangeCode(code)
     if err != nil {
         slog.Error(fmt.Sprintf("Auth : %v", err))
-        return c.JSON(500, "{}")
+        c.QueryParams().Add("autherr", "github")
+        return c.Redirect(302, "/")
     }
     
     data, err := getUserData(auth.Access_token)
     if err != nil {
         slog.Error(fmt.Sprintf("Auth : %v", err))
-        return c.JSON(500, "{}")
+        c.QueryParams().Add("autherr", "github")
+        return c.Redirect(302, "/")
     }
+    fmt.Print(data)
     
     cookie := &http.Cookie{ Name: "session", Value: string(code) }
     http.SetCookie(c.Response(), cookie)
     
-    response := map[string]interface{}{}
-    response["username"] = data.Username
-    response["avatar_url"] = data.AvatarUrl
-    response["repos"] = data.RepoNames
-    respJson, err := json.Marshal(response)
-    if err != nil {
-        slog.Error(fmt.Sprintf("Auth : %v", err))
-        return c.JSON(500, "{}")
-    }
-    
-    return c.JSON(200, respJson)
+    return c.Redirect(302, "/")
 }
 
 
@@ -68,11 +58,13 @@ func getUserData(access_token string) (UserData, error) {
     userData := UserData{}
     err := getUserName(access_token, &userData)
     if err != nil {
-        fmt.Printf(err.Error())
+        slog.Error(fmt.Sprintf("GetUserData: %v", err.Error()))
+        return UserData{}, err
     }
     err = getUserRepos(access_token, &userData)
     if err != nil {
-        fmt.Printf(err.Error())
+        slog.Error(fmt.Sprintf("GetUserData: %v", err.Error()))
+        return UserData{}, err
     }
     return userData, nil
 }
@@ -137,7 +129,7 @@ func getUserRepos(access_token string, data *UserData) (error) {
     return nil
 }
 
-func exchangeCode(code string) (UserAuth, error) {
+func exchangeCode(code string) (database.GithubAuth, error) {
     params := url.Values{}
     params.Set("client_id", os.Getenv("CLIENT_ID"))
     params.Set("client_secret", os.Getenv("CLIENT_SECRET"))
@@ -146,20 +138,20 @@ func exchangeCode(code string) (UserAuth, error) {
     url := "https://github.com/login/oauth/access_token"
     req, err := http.NewRequest("POST", url, strings.NewReader(params.Encode()))
     if err != nil {
-        return UserAuth{}, err
+        return database.GithubAuth{}, err
     }
     req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
     req.Header.Add("Accept", "application/json")
     resp, err := http.DefaultClient.Do(req)
     if err != nil {
-        return UserAuth{}, err
+        return database.GithubAuth{}, err
     }
 
     var data map[string]interface{}
     json.NewDecoder(resp.Body).Decode(&data)
     expires_in := data["expires_in"].(float64)
     refresh_expires_in := data["refresh_token_expires_in"].(float64)
-    result := UserAuth {
+    result := database.GithubAuth {
         Access_token: data["access_token"].(string),
         Refresh_token: data["refresh_token"].(string),
         Expires_in: expires_in,
