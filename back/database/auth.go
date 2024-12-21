@@ -1,5 +1,6 @@
 package database
 
+
 type GithubAuth struct {
     UserId              int
     Cookie              string
@@ -8,7 +9,6 @@ type GithubAuth struct {
     Expires_in          int
     Refresh_expires_in  int
 }
-
 
 
 func AddGithubUser(auth GithubAuth) error {
@@ -43,6 +43,27 @@ func AddGithubUser(auth GithubAuth) error {
 
     err = tx.Commit()
     return err
+}
+
+func TokenFromCookie(cookie string) (string, error) {
+    db := dbInstance.db
+    q := `SELECT access_token FROM GithubAuth
+        WHERE cookie=$1`
+
+    rows, err := db.Query(q, cookie)
+    if err != nil {
+        return "", err
+    }
+    defer rows.Close()
+
+    var access_token string
+    rows.Next()
+    err = rows.Scan(&access_token)
+    if err != nil {
+        return "", err
+    }
+
+    return access_token, nil
 }
 
 

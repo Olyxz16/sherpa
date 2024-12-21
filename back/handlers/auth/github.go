@@ -3,7 +3,6 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -17,10 +16,10 @@ import (
 
 
 type UserData struct {
-    UserID              int
-    Username            string
-    AvatarUrl           string
-    RepoNames           []string
+    UserID              int         `json:"id"`
+    Username            string      `json:"login"`
+    AvatarUrl           string      `json:"avatar_url"`
+    RepoNames           []string    
 }
 
 // TODO: properly handle errors
@@ -38,7 +37,6 @@ func AuthGithubLogin(c echo.Context) error {
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
-    
 
     data := &UserData{}
     err = getUserName(auth.Access_token, data)
@@ -63,7 +61,7 @@ func AuthGithubLogin(c echo.Context) error {
 
 
 
-func getUserData(access_token string) (UserData, error) {
+func GetUserData(access_token string) (UserData, error) {
     userData := UserData{}
     err := getUserName(access_token, &userData)
     if err != nil {
@@ -93,49 +91,51 @@ func getUserName(access_token string, data *UserData) (error) {
     }
     defer resp.Body.Close()
 
-    var result map[string]interface{}
-    json.NewDecoder(resp.Body).Decode(&result)
-    
-    data.UserID = int(result["id"].(float64))
-    data.Username = result["login"].(string)
-    data.AvatarUrl = result["avatar_url"].(string)
+    err = json.NewDecoder(resp.Body).Decode(data)
+    if err != nil {
+        return err
+    }
+
     return nil
 }
 func getUserRepos(access_token string, data *UserData) (error) {
+    result := make([]string, 0)
     url := "https://api.github.com/user/repos"
-    req, err := http.NewRequest("GET", url, nil)
-    if err != nil {
-        return err
-    }
-    req.Header.Add("Accept", "*/*")
-    req.Header.Add("Content-Type", "application/vnd.github.v3+json")
-    req.Header.Add("User-Agent", "curl/7.64.0")
-    req.Header.Add("Authorization", fmt.Sprintf("token %s", access_token))
-    req.Header.Add("X-Accepted-GitHub-Permissions", "metadata=read")
-    resp, err := http.DefaultClient.Do(req)
-    if err != nil {
-        return err
-    }
-    defer resp.Body.Close()
+    nextPage := func() bool { 
+        req, err := http.NewRequest("GET", url, nil)
+        if err != nil {
+            return false
+        }
+        req.Header.Add("Accept", "*/*")
+        req.Header.Add("Content-Type", "application/vnd.github.v3+json")
+        req.Header.Add("User-Agent", "curl/7.64.0")
+        req.Header.Add("Authorization", fmt.Sprintf("token %s", access_token))
+        req.Header.Add("X-Accepted-GitHub-Permissions", "metadata=read")
+        resp, err := http.DefaultClient.Do(req)
+        if err != nil {
+            return false
+        }
+        defer resp.Body.Close()
 
-    body, err := io.ReadAll(resp.Body)
-    if err != nil {
-        return err
-    }
+        var body []map[string]interface{}
+        err = json.NewDecoder(resp.Body).Decode(&body)
+        if err != nil {
+            return false
+        }
 
-    var result []map[string]interface{}
-    err = json.Unmarshal(body, &result)
-    if err != nil {
-        return err
-    }
+        for _, v := range body {
+            name := v["name"].(string)
+            result = append(result, name)
+        }
 
-    names := []string{}
-    for _, repo := range result {
-        repoName := repo["name"].(string)
-        names = append(names, repoName)
+        next := resp.Header.Get("Link")
+        url = next[strings.Index(next, "<")+1 : strings.Index(next, ">")]
+        return url[len(url)-1] != '1'
     }
-    data.RepoNames = names
-
+    
+    for nextPage() {
+    }
+    data.RepoNames = result
     return nil
 }
 
