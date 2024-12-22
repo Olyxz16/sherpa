@@ -23,7 +23,8 @@ func AddGithubUser(auth GithubAuth) error {
     q := `INSERT INTO GithubAuth
         (cookie, access_token, expires_in, refresh_token, rt_expires_in, userId)
         VALUES ($1, $2, $3, $4, $5, $6)
-    `
+        ON CONFLICT (userId) DO UPDATE
+        SET cookie = EXCLUDED.cookie`
     tx, err := db.Begin()
     if err != nil {
         return err
@@ -87,14 +88,12 @@ func migrateGithubAuth() {
     }
 
     q := `CREATE TABLE IF NOT EXISTS GithubAuth (
-        cookie          VARCHAR(255),
+        cookie          VARCHAR(255) UNIQUE,
         access_token    VARCHAR(255),
         expires_in      FLOAT,
         refresh_token   VARCHAR(255),
         rt_expires_in   FLOAT,
-        userId          INT,
-        CONSTRAINT fk_userId FOREIGN KEY (userId)
-        REFERENCES SherpaUser(uid)
+        userId          INT          UNIQUE REFERENCES SherpaUser(uid)
     )`
     _, err = db.Exec(q)
     if err != nil {

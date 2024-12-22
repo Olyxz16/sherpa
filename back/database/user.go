@@ -10,7 +10,8 @@ func AddUser(user SherpaUser) error {
     db := dbInstance.db
     q := `INSERT INTO SherpaUser
         (uid)
-        VALUES ($1)`
+        VALUES ($1)
+        ON CONFLICT (uid) DO NOTHING`
 
     tx, err := db.Begin()
     if err != nil {
@@ -36,7 +37,7 @@ func migrateSherpaUser() {
     New()
     db := dbInstance.db
     q := `CREATE TABLE IF NOT EXISTS SherpaUser (
-        uid             SERIAL PRIMARY KEY
+        uid             INT PRIMARY KEY
     )`
     _, err := db.Exec(q)
     if err != nil {
