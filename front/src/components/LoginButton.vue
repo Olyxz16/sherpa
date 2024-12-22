@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/stores/userStore'
+import router from '@/router'
 const store = useUserStore()
 
 const displayName = ref("Log in")
@@ -14,10 +15,13 @@ watch(loggedIn, () => {
   displayAvatarUrl.value = avatarUrl.value
 })
 
+function routeLogin() {
+  router.push({path: "/login"})
+}
 </script>
 
 <template>
-  <button>
+  <button @click="routeLogin">
     <div class="avatar rounded-full border border-input">
       <p id="displayname"> {{ displayName }} </p>
       <Avatar>
