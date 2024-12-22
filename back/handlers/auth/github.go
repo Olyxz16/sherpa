@@ -19,7 +19,7 @@ type UserData struct {
     UserID              int         `json:"id"`
     Username            string      `json:"login"`
     AvatarUrl           string      `json:"avatar_url"`
-    RepoNames           []string    
+    RepoNames           []string    `json:"repositories"`
 }
 
 // TODO: properly handle errors
