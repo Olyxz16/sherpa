@@ -16,9 +16,9 @@ import (
 
 
 type UserData struct {
-    UserID              int         `json:"id"`
-    Username            string      `json:"login"`
-    AvatarUrl           string      `json:"avatar_url"`
+    UserID              int         `json:"userId"`
+    Username            string      `json:"username"`
+    AvatarUrl           string      `json:"avatarUrl"`
     RepoNames           []string    `json:"repositories"`
 }
 
@@ -91,10 +91,15 @@ func getUserName(access_token string, data *UserData) (error) {
     }
     defer resp.Body.Close()
 
-    err = json.NewDecoder(resp.Body).Decode(data)
+    var body map[string]interface{}
+    err = json.NewDecoder(resp.Body).Decode(&body)
     if err != nil {
         return err
     }
+    
+    data.UserID = int(body["id"].(float64))
+    data.Username = body["login"].(string)
+    data.AvatarUrl = body["avatar_url"].(string)
 
     return nil
 }
