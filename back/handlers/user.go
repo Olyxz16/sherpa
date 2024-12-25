@@ -16,7 +16,7 @@ func FetchUser(c echo.Context) error {
     if authHeader == "" {
         return c.JSON(401, "{message: Unauthorized}")
     }
-    sessionCookie := strings.Split(authHeader, " ")[1]
+    c.Cookie("session")
     access_token, err := database.TokenFromCookie(sessionCookie)
     if err != nil {
         return c.JSON(401, "{message: Unauthorized}")

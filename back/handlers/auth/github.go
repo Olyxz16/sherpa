@@ -14,9 +14,8 @@ import (
 	"github.com/Olyxz16/go-vue-template/database"
 )
 
-
 type UserData struct {
-    UserID              int         `json:"userId"`
+    PlatformID          int         `json:"userId"`
     Username            string      `json:"username"`
     AvatarUrl           string      `json:"avatarUrl"`
     RepoNames           []string    `json:"repositories"`
@@ -31,7 +30,7 @@ func AuthGithubLogin(c echo.Context) error {
         return c.Redirect(302, "/")
     }
 
-    auth, cookie, err := exchangeCode(code)
+    platformAuth, err := exchangeCode(code)
     if err != nil {
         slog.Error(fmt.Sprintf("Auth : %v", err))
         c.QueryParams().Add("autherr", "github")
@@ -39,23 +38,25 @@ func AuthGithubLogin(c echo.Context) error {
     }
 
     data := &UserData{}
-    err = getUserName(auth.Access_token, data)
+    err = getUserName(platformAuth.Access_token, data)
     if err != nil {
         slog.Error(fmt.Sprintf("Auth : %v", err))
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
 
-    auth.UserId = data.UserID
+    platformAuth.PlatformId = data.PlatformID
     
-    err = database.AddGithubUser(*auth)
+    userAuth, isNew, err := database.AuthenticateUser(*platformAuth)
     if err != nil {
         slog.Error(fmt.Sprintf("Auth : %v", err))
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
     
-    http.SetCookie(c.Response(), cookie)
+    if isNew {
+        http.SetCookie(c.Response(), userAuth.Cookie)
+    }
     return c.Redirect(302, "/")
 }
 
@@ -129,7 +130,11 @@ func getUserRepos(access_token string, data *UserData) (error) {
         }
 
         for _, v := range body {
-            name := v["name"].(string)
+            name, ok := v["name"].(string)
+            if !ok {
+                // Handle parsing error
+                continue
+            }
             result = append(result, name)
         }
 
@@ -144,7 +149,7 @@ func getUserRepos(access_token string, data *UserData) (error) {
     return nil
 }
 
-func exchangeCode(code string) (*database.GithubAuth, *http.Cookie, error) {
+func exchangeCode(code string) (*database.PlatformUserAuth, error) {
     params := url.Values{}
     params.Set("client_id", os.Getenv("CLIENT_ID"))
     params.Set("client_secret", os.Getenv("CLIENT_SECRET"))
@@ -153,30 +158,25 @@ func exchangeCode(code string) (*database.GithubAuth, *http.Cookie, error) {
     url := "https://github.com/login/oauth/access_token"
     req, err := http.NewRequest("POST", url, strings.NewReader(params.Encode()))
     if err != nil {
-        return nil, nil, err
+        return nil, err
     }
     req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
     req.Header.Add("Accept", "application/json")
     resp, err := http.DefaultClient.Do(req)
     if err != nil {
-        return nil, nil, err
+        return nil, err
     }
     
-    cookie, err := generateCookie()
-    if err != nil {
-        return nil, nil, err
-    }
-
     var data map[string]interface{}
     json.NewDecoder(resp.Body).Decode(&data)
     expires_in := data["expires_in"].(float64)
     refresh_expires_in := data["refresh_token_expires_in"].(float64)
-    result := &database.GithubAuth {
-        Cookie: cookie.Value,
+    result := &database.PlatformUserAuth {
+        Source: "github.com",
         Access_token: data["access_token"].(string),
         Refresh_token: data["refresh_token"].(string),
         Expires_in: int(expires_in),
         Refresh_expires_in: int(refresh_expires_in),
     }
-    return result, cookie, nil
+    return result, nil
 }
