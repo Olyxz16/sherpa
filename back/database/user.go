@@ -93,7 +93,7 @@ func migrateUserAuth() {
     New()
     db := dbInstance.db
     q := `CREATE TABLE IF NOT EXISTS UserAuth (
-        uid             SERIAL PRIMARY KEY
+        uid             SERIAL PRIMARY KEY,
         cookie          BYTEA UNIQUE
     )`
     _, err := db.Exec(q)

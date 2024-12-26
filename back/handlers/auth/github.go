@@ -97,7 +97,7 @@ func getUserName(access_token string, data *UserData) (error) {
         return err
     }
     
-    data.UserID = int(body["id"].(float64))
+    data.PlatformID = int(body["id"].(float64))
     data.Username = body["login"].(string)
     data.AvatarUrl = body["avatar_url"].(string)
 

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"strings"
 
 	"github.com/labstack/echo/v4"
 
@@ -12,12 +11,15 @@ import (
 
 
 func FetchUser(c echo.Context) error {
-    authHeader := c.Request().Header.Get("Authorization")
-    if authHeader == "" {
-        return c.JSON(401, "{message: Unauthorized}")
+    source := c.QueryParam("source")
+    if source == "" {
+        return c.JSON(401, `{message: Missing source}`)
     }
-    c.Cookie("session")
-    access_token, err := database.TokenFromCookie(sessionCookie)
+    cookie, err :=  c.Cookie("session")
+    if err != nil {
+        return c.JSON(401, `{message: "Missing cookie"}`)
+    }
+    access_token, err := database.TokenFromCookie(cookie, source)
     if err != nil {
         return c.JSON(401, "{message: Unauthorized}")
     }

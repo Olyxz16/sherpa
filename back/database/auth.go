@@ -101,10 +101,9 @@ func migrateGithubAuth() {
     }
 
     q := `CREATE TABLE IF NOT EXISTS PlatformUserAuth (
-    userId          INT          REFERENCES SherpaUser(uid)
-    platformId      INT
+    userId          INT          REFERENCES SherpaUser(uid),
+    platformId      INT,
     source          VARCHAR(255),
-    cookie          VARCHAR(255) UNIQUE,
     access_token    VARCHAR(255),
     expires_in      FLOAT,
     refresh_token   VARCHAR(255),
