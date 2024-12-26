@@ -18,6 +18,7 @@ An environment storing and sharing tool
       prompt for account password
 
 ### TODO 
+- Create error views #feat
 - Save data #back
 - Fetch data from file on selection #front
 - Store previous nav data ? #front
