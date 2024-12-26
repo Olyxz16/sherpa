@@ -21,7 +21,6 @@ type UserData struct {
     RepoNames           []string    `json:"repositories"`
 }
 
-// TODO: properly handle errors
 func AuthGithubLogin(c echo.Context) error {
     code := c.QueryParam("code")
     if code == "" {

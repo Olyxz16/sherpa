@@ -9,7 +9,6 @@ const (
     cookie_size = 24
 )
 
-// TODO: Implement expiration
 func generateUserCookie() (*http.Cookie, error) {
     token := make([]byte, cookie_size)
     _, err := rand.Read(token)
