@@ -2,6 +2,8 @@ package database
 
 import (
 	"crypto/rand"
+	"encoding/base64"
+	"encoding/json"
 	"net/http"
 )
 
@@ -29,4 +31,23 @@ func generateUserCookie() (*http.Cookie, error) {
     val := string(token)
     cookie := &http.Cookie{ Name: "session", Value: val, Path: "/" }
     return cookie, nil
+}
+
+func marshalCookie(cookie *http.Cookie) (string, error) {
+    jsonStr, err := json.Marshal(cookie)
+    if err != nil {
+        return "", err
+    }
+    encodedText := base64.StdEncoding.EncodeToString([]byte(jsonStr))
+    return encodedText, nil
+}
+
+func unmarshalCookie(str string) (*http.Cookie, error) {
+    decodedText, err := base64.StdEncoding.DecodeString(str)
+    if err != nil {
+        return nil, err
+    }
+    cookie := &http.Cookie{}
+    err = json.Unmarshal(decodedText, cookie)
+    return cookie, err
 }
