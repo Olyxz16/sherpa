@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	_ "github.com/joho/godotenv/autoload"
+	"github.com/joho/godotenv"
 
 	"github.com/Olyxz16/go-vue-template/database"
 	"github.com/Olyxz16/go-vue-template/handlers"
@@ -42,7 +42,11 @@ func NewServer() *http.Server {
 
 func init() {
     var err error
-
+    
+    if err = godotenv.Load() ; err != nil {
+        panic("Error loading environment !")
+    }
+    
     host = strings.Trim(os.Getenv("HOST"), " ")
     portStr := strings.Trim(os.Getenv("PORT"), " ")
     port, err = strconv.Atoi(portStr)
@@ -51,18 +55,18 @@ func init() {
     }
     
     staticDir = strings.Trim(os.Getenv("STATIC_DIR"), " ")
-    staticDir, err = filepath.Abs(staticDir)
-    if err != nil {
-        panic("Error parsing filepath")
-    }
-    isDebugMode := strings.Trim(os.Getenv("DEBUG"), " ")
+    _, isDebugMode := os.LookupEnv("DEBUG")
     if staticDir == "" {
-        if isDebugMode == "true" {
+        if isDebugMode {
             slog.Warn("API MODE IS ACTIVE. Add --staticFilepath flag to serve static file")
         } else {
             panic("STATIC_DIR env is not set ! Cannot serve static files !")
         }
     } else {
+        staticDir, err = filepath.Abs(staticDir)
+        if err != nil {
+            panic("Error parsing filepath")
+        }
         handlers.StaticDir = staticDir
     }
 }
