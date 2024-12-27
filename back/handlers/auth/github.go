@@ -3,7 +3,6 @@ package auth
 import (
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+    "github.com/Olyxz16/go-vue-template/logging"
 	"github.com/Olyxz16/go-vue-template/database"
 )
 
@@ -24,14 +24,14 @@ type UserData struct {
 func AuthGithubLogin(c echo.Context) error {
     code := c.QueryParam("code")
     if code == "" {
-        slog.Error("Auth : missing code")
+        logging.ErrLog("Auth: missing code")
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
 
     platformAuth, err := exchangeCode(code)
     if err != nil {
-        slog.Error(fmt.Sprintf("Auth : %v", err))
+        logging.ErrLog(fmt.Sprintf("Code exchange : %v", err.Error()))
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
@@ -39,7 +39,7 @@ func AuthGithubLogin(c echo.Context) error {
     data := &UserData{}
     err = getUserName(platformAuth.Access_token, data)
     if err != nil {
-        slog.Error(fmt.Sprintf("Auth : %v", err))
+        logging.ErrLog(fmt.Sprintf("Get username: %v", err.Error()))
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
@@ -48,7 +48,7 @@ func AuthGithubLogin(c echo.Context) error {
     
     userAuth, isNew, err := database.AuthenticateUser(*platformAuth)
     if err != nil {
-        slog.Error(fmt.Sprintf("Auth : %v", err))
+        logging.ErrLog(fmt.Sprintf("Auth: %v", err.Error()))
         c.QueryParams().Add("autherr", "github")
         return c.Redirect(302, "/")
     }
@@ -65,12 +65,12 @@ func GetUserData(access_token string) (UserData, error) {
     userData := UserData{}
     err := getUserName(access_token, &userData)
     if err != nil {
-        slog.Error(fmt.Sprintf("GetUserData: %v", err.Error()))
+        logging.ErrLog(fmt.Sprintf("GetUserData: %v", err.Error()))
         return UserData{}, err
     }
     err = getUserRepos(access_token, &userData)
     if err != nil {
-        slog.Error(fmt.Sprintf("GetUserData: %v", err.Error()))
+        logging.ErrLog(fmt.Sprintf("GetUserData: %v", err.Error()))
         return UserData{}, err
     }
     return userData, nil
