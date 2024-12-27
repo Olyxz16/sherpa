@@ -24,8 +24,8 @@ func init() {
     slog.SetDefault(logger)
 }
 
-func ErrLog(msg string, args ...any) {
-    slog.Error(msg, args)
+func ErrLog(msg string) {
+    slog.Error(msg)
     if debugMode {
         debug.PrintStack()
     }
