@@ -29,12 +29,19 @@ func generateUserCookie() (*http.Cookie, error) {
     }
 
     val := string(token)
-    cookie := &http.Cookie{ Name: "session", Value: val, Path: "/" }
+    cookie := cookieFromKey(val)
     return cookie, nil
 }
 
+func cookieFromKey(key string) (*http.Cookie) {
+    return &http.Cookie{
+        Name: "session",
+        Value: key,
+        Path: "/",
+    } 
+}
 func marshalCookie(cookie *http.Cookie) (string, error) {
-    jsonStr, err := json.Marshal(cookie)
+    jsonStr, err := json.Marshal(cookie.Value)
     if err != nil {
         return "", err
     }
@@ -47,7 +54,8 @@ func unmarshalCookie(str string) (*http.Cookie, error) {
     if err != nil {
         return nil, err
     }
-    cookie := &http.Cookie{}
-    err = json.Unmarshal(decodedText, cookie)
+    var cookieStr string
+    err = json.Unmarshal(decodedText, &cookieStr)
+    cookie := cookieFromKey(cookieStr)
     return cookie, err
 }
