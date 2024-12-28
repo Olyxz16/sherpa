@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/Olyxz16/go-vue-template/database"
-	"github.com/Olyxz16/go-vue-template/handlers/auth"
+	"github.com/Olyxz16/go-vue-template/handlers/github"
 )
 
 
@@ -23,7 +23,7 @@ func FetchUser(c echo.Context) error {
     if err != nil {
         return c.JSON(401, "{message: Unauthorized}")
     }
-    userData, err := auth.GetUserData(access_token) 
+    userData, err := github.GetUserData(access_token) 
     if err != nil {
         return c.JSON(500, "{message: Internal error}")
     }
