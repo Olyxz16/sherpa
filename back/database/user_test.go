@@ -6,6 +6,10 @@ import (
 )
 
 
+/*************************/
+/* GetUserFromPlatformID */
+/*************************/
+
 func TestGetUserFromPlatformID(t *testing.T) {
     New()
     uid := 569991
@@ -40,6 +44,9 @@ func TestGetUserFromPlatformID(t *testing.T) {
     }
 
     actual, err := GetUserFromPlatformId(platformAuth)
+    if err != nil {
+        t.Fatalf("GetUserFromPlatformId failed : %v", err)
+    }
 
     if !reflect.DeepEqual(inputUserAuth, *actual) {
         t.Logf(`
@@ -49,6 +56,45 @@ func TestGetUserFromPlatformID(t *testing.T) {
         t.Fail()
     } 
 }
+
+func GetNonExistentUser(t *testing.T) {
+    New()
+    platformAuth := PlatformUserAuth {
+        UserId: 5668988,
+        PlatformId: 1222333,
+        Source: "github.com",
+        Access_token: "IJNYIHYHY",
+        Refresh_token: "AZEEEEEE",
+        Expires_in: 10000,
+        Refresh_expires_in: 10000,
+    }
+    err := clean()
+    if err != nil {
+        t.Fatalf("Failed cleaning database : %v", err)
+    }
+    err = insertPlatform(platformAuth)
+    if err != nil {
+        t.Fatalf("Failed inserting platformAuth : %v", err)
+    }
+
+    actual, err := GetUserFromPlatformId(platformAuth)
+    if err != nil {
+        t.Fatalf("GetUserFromPlatformId failed: %v", err)
+    }
+
+    if actual != nil {
+        t.Logf(`
+            invalid result :\n
+            expected: %v\n
+            actual: %v\n`, nil, actual)
+    }
+
+}
+
+
+/*************/
+/*   Utils   */
+/*************/
 
 func clean() error {
     db := dbInstance.db
