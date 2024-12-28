@@ -11,10 +11,8 @@ import (
 
 
 func FetchUser(c echo.Context) error {
-    source := c.QueryParam("source")
-    if source == "" {
-        return c.JSON(401, `{message: Missing source}`)
-    }
+    // handle data source
+    source := "github.com"
     cookie, err :=  c.Cookie("session")
     if err != nil {
         return c.JSON(401, `{message: "Missing cookie"}`)
