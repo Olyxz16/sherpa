@@ -2,6 +2,8 @@
 An environment storing and sharing tool
 
 ### DOING
+- Switch to test driven dev
+  - Make sure auth works with tests to gain time
 - Authentication #back
   - select authentication method
   - check account cookie
