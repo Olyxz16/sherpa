@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-
 /*************************/
 /* GetUserFromPlatformID */
 /*************************/
@@ -89,6 +88,37 @@ func GetNonExistentUser(t *testing.T) {
             actual: %v\n`, nil, actual)
     }
 
+}
+
+
+/***************************/
+/* GetUserOrCreateFromAuth */
+/***************************/
+
+func TestCreateUser(t *testing.T) {
+    New()
+    platformAuth := PlatformUserAuth {
+        UserId: 5668988,
+        PlatformId: 1222333,
+        Source: "github.com",
+        Access_token: "IJNYIHYHY",
+        Refresh_token: "AZEEEEEE",
+        Expires_in: 10000,
+        Refresh_expires_in: 10000,
+    }
+    err := clean()
+    if err != nil {
+        t.Fatalf("Failed cleaning database : %v", err)
+    }
+
+    _, isNew, err := GetUserOrCreateFromAuth(platformAuth)
+
+    if err != nil {
+        t.Fatalf("Failed GetUserOrCreateFromAuth : %v", err)
+    }
+    if !isNew {
+        t.Fatalf("isNew : actual %v | expected %v", isNew, true)
+    }
 }
 
 
