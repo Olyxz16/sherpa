@@ -1,8 +1,10 @@
 package database
 
 import (
-	"encoding/json"
-	"net/http"
+	"fmt"
+    "net/http"
+
+	"github.com/Olyxz16/go-vue-template/logging"
 )
 
 
@@ -15,10 +17,12 @@ type UserAuth struct {
 func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
     db := dbInstance.db
     q := `SELECT uid, cookie FROM UserAuth
-            WHERE PlatformUserAuth.id=$1`
+            JOIN PlatformUserAuth ON uid = userId
+            WHERE platformId=$1`
 
     rows, err := db.Query(q, user.PlatformId)
     if err != nil {
+        logging.ErrLog(fmt.Sprintf("GetUserFromPlatformId : %v", err))
         return nil, err
     }
     defer rows.Close()
@@ -26,12 +30,12 @@ func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
     var result *UserAuth
     if rows.Next() {
         var uid int
-        var cookieStr []byte
+        var cookieStr string
         var cookie *http.Cookie
-        if err := rows.Scan(&uid, cookieStr) ; err != nil {
+        if err := rows.Scan(&uid, &cookieStr) ; err != nil {
             return nil, err
         }
-        if err := json.Unmarshal(cookieStr, cookie) ; err != nil {
+        if cookie, err = unmarshalCookie(cookieStr) ; err != nil {
             return nil, err    
         }
         result = &UserAuth{ Uid: uid, Cookie: cookie }
@@ -44,21 +48,18 @@ func GetUserOrCreateFromAuth(platformUser PlatformUserAuth) (*UserAuth, bool, er
     db := dbInstance.db
     currUser, err := GetUserFromPlatformId(platformUser)
     if err != nil {
+        logging.ErrLog(fmt.Sprintf("GetUserOrCreateFromAuth : %v", err))
         return nil, false, err
     }
     if currUser != nil {
         return currUser, false, nil
     }
     
-    cookie, err := generateUserCookie()
-    if err != nil {
-        return nil, false, err
-    }
     q := `INSERT INTO UserAuth
         (cookie)
         VALUES ($1)
-        RETURNING (uid)
-        ON CONFLICT (cookie) DO NOTHING`
+        ON CONFLICT (cookie) DO NOTHING
+        RETURNING (uid)`
 
     tx, err := db.Begin()
     if err != nil {
@@ -66,11 +67,20 @@ func GetUserOrCreateFromAuth(platformUser PlatformUserAuth) (*UserAuth, bool, er
     }
     defer tx.Rollback()
 
-    cookieStr, err := json.Marshal(cookie)
-    rows, err := tx.Query(q, cookieStr)
+    cookie, err := generateUserCookie()
     if err != nil {
         return nil, false, err
     }
+    cookieStr, err := marshalCookie(cookie)
+    if err != nil {
+        return nil, false, err
+    }
+    rows, err := tx.Query(q, cookieStr)
+    if err != nil {
+        logging.ErrLog(fmt.Sprintf("GetUserOrCreateFromAuth : %v", err))
+        return nil, false, err
+    }
+    defer rows.Close()
 
     var uid int
     if rows.Next() {
@@ -94,7 +104,7 @@ func migrateUserAuth() {
     db := dbInstance.db
     q := `CREATE TABLE IF NOT EXISTS UserAuth (
         uid             SERIAL PRIMARY KEY,
-        cookie          BYTEA UNIQUE
+        cookie          TEXT UNIQUE
     )`
     _, err := db.Exec(q)
     if err != nil {
