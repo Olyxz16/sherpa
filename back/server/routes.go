@@ -7,7 +7,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/Olyxz16/go-vue-template/handlers"
-	"github.com/Olyxz16/go-vue-template/handlers/auth"
+	"github.com/Olyxz16/go-vue-template/handlers/github"
 )
 
 func RegisterRoutes() http.Handler {
@@ -22,7 +22,7 @@ func RegisterRoutes() http.Handler {
     
     /* Api endpoints */
     /* Auth */
-    e.GET("/auth/github/callback", auth.AuthGithubLogin)
+    e.GET("/auth/github/callback", github.AuthGithubLogin)
 
     e.GET("/user", handlers.FetchUser)
 
