@@ -11,12 +11,11 @@ const (
     cookie_size = 24
 )
 
-// TODO: Implement expiration
-func generateUserCookie() (*http.Cookie, error) {
+func randLetterString() (string, error) {
     token := make([]byte, cookie_size)
     _, err := rand.Read(token)
     if err != nil {
-        return nil, err
+        return "", err
     }
 
     for i, v := range token {
@@ -27,8 +26,16 @@ func generateUserCookie() (*http.Cookie, error) {
             token[i] = newv -26 + 'A'
         }
     }
-
     val := string(token)
+    return val, nil
+}
+
+// TODO: Implement expiration
+func generateUserCookie() (*http.Cookie, error) {
+    val, err := randLetterString()
+    if err != nil {
+        return nil, err
+    }
     cookie := cookieFromKey(val)
     return cookie, nil
 }
