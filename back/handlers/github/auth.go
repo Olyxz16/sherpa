@@ -17,33 +17,30 @@ import (
 func AuthGithubLogin(c echo.Context) error {
     code := c.QueryParam("code")
     if code == "" {
-        c.QueryParams().Add("autherr", "github")
-        return c.Redirect(302, "/")
+        return c.Redirect(302, "/auth_error")
     }
 
     platformAuth, err := exchangeCode(code)
     if err != nil {
-        c.QueryParams().Add("autherr", "github")
-        return c.Redirect(302, "/")
+        return c.Redirect(302, "/auth_error")
     }
 
     data := &UserData{}
     err = getUserName(platformAuth.Access_token, data)
     if err != nil {
-        c.QueryParams().Add("autherr", "github")
-        return c.Redirect(302, "/")
+        return c.Redirect(302, "/auth_error")
     }
     
     platformAuth.PlatformId = data.PlatformID
     
     userAuth, isNew, err := database.AuthenticateUser(*platformAuth)
     if err != nil {
-        c.QueryParams().Add("autherr", "github")
-        return c.Redirect(302, "/")
+        return c.Redirect(302, "/auth_error")
     }
     
+    http.SetCookie(c.Response(), userAuth.Cookie)
     if isNew {
-        http.SetCookie(c.Response(), userAuth.Cookie)
+        return c.Redirect(302, "/welcome")
     }
     return c.Redirect(302, "/")
 }
