@@ -126,6 +126,18 @@ func TestCreateUser(t *testing.T) {
 /*   Utils   */
 /*************/
 
+func mockUserIdFromPlatform(platform PlatformUserAuth) (*UserAuth, error) {
+    cookie, err := generateUserCookie()
+    if err != nil {
+        return nil, err
+    }
+    user := &UserAuth{
+        Uid: platform.UserId,
+        Cookie: cookie,
+    }
+    return user, nil
+}
+
 func clean() error {
     db := dbInstance.db
     q := `TRUNCATE TABLE UserAuth CASCADE`
