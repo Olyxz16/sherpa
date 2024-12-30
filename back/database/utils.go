@@ -4,12 +4,26 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 )
 
-const (
+var (
     cookie_size = 24
+    // 1 year duration | TODO : make actual definition
+    cookie_duration = time.Now().AddDate(1 , 0 , 0)
 )
+
+
+func generateUserCookie() (*http.Cookie, error) {
+    val, err := randLetterString()
+    if err != nil {
+        return nil, err
+    }
+    cookie := cookieFromKey(val)
+    return cookie, nil
+}
 
 func randLetterString() (string, error) {
     token := make([]byte, cookie_size)
@@ -30,21 +44,14 @@ func randLetterString() (string, error) {
     return val, nil
 }
 
-// TODO: Implement expiration
-func generateUserCookie() (*http.Cookie, error) {
-    val, err := randLetterString()
-    if err != nil {
-        return nil, err
-    }
-    cookie := cookieFromKey(val)
-    return cookie, nil
-}
-
 func cookieFromKey(key string) (*http.Cookie) {
-    return &http.Cookie{
+    expires := cookie_duration
+    fmt.Printf("%v\n", expires)
+    return &http.Cookie {
         Name: "session",
         Value: key,
         Path: "/",
+        Expires: expires,
     } 
 }
 func marshalCookie(cookie *http.Cookie) (string, error) {
