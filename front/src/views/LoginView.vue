@@ -1,18 +1,14 @@
 <script setup lang="ts">
 import HomeView from './HomeView.vue';
 import LoginForm from '@/components/login/LoginForm.vue';
-import router from '@/router'
-
-function routeHome() {
-  router.push({path: '/'})
-}
+import ViewBlocker from '@/components/ViewBlocker.vue'
 </script>
 
 <template>
   <HomeView />
-  <div @click="routeHome" class="view-blocker">
+  <ViewBlocker path="/">
     <LoginForm id="login-form" />
-  </div>
+  </ViewBlocker>
 </template>
 
 <style scoped>
