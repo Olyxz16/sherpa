@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import { Check, ChevronsUpDown } from 'lucide-vue-next'
-import { ref, defineProps, defineEmits, type PropType } from 'vue'
+import { ref, type PropType } from 'vue'
 import type { Option } from '@/types/ComboBoxTypes'
 
 const props = defineProps({
