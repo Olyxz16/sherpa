@@ -4,6 +4,7 @@ import (
 	"fmt"
     "net/http"
 
+    "github.com/Olyxz16/go-vue-template/database/utils"
 	"github.com/Olyxz16/go-vue-template/logging"
 )
 
@@ -35,7 +36,7 @@ func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
         if err := rows.Scan(&uid, &cookieStr) ; err != nil {
             return nil, err
         }
-        if cookie, err = unmarshalCookie(cookieStr) ; err != nil {
+        if cookie, err = utils.UnmarshalCookie(cookieStr) ; err != nil {
             return nil, err    
         }
         result = &UserAuth{ Uid: uid, Cookie: cookie }
@@ -67,11 +68,11 @@ func GetUserOrCreateFromAuth(platformUser PlatformUserAuth) (*UserAuth, bool, er
     }
     defer tx.Rollback()
 
-    cookie, err := generateUserCookie()
+    cookie, err := utils.GenerateUserCookie()
     if err != nil {
         return nil, false, err
     }
-    cookieStr, err := marshalCookie(cookie)
+    cookieStr, err := utils.MarshalCookie(cookie)
     if err != nil {
         return nil, false, err
     }

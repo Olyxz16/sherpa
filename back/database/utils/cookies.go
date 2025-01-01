@@ -1,4 +1,4 @@
-package database
+package utils
 
 import (
 	"crypto/rand"
@@ -16,8 +16,8 @@ var (
 )
 
 
-func generateUserCookie() (*http.Cookie, error) {
-    val, err := randLetterString()
+func GenerateUserCookie() (*http.Cookie, error) {
+    val, err := RandLetterString()
     if err != nil {
         return nil, err
     }
@@ -25,7 +25,7 @@ func generateUserCookie() (*http.Cookie, error) {
     return cookie, nil
 }
 
-func randLetterString() (string, error) {
+func RandLetterString() (string, error) {
     token := make([]byte, cookie_size)
     _, err := rand.Read(token)
     if err != nil {
@@ -54,7 +54,7 @@ func cookieFromKey(key string) (*http.Cookie) {
         Expires: expires,
     } 
 }
-func marshalCookie(cookie *http.Cookie) (string, error) {
+func MarshalCookie(cookie *http.Cookie) (string, error) {
     jsonStr, err := json.Marshal(cookie.Value)
     if err != nil {
         return "", err
@@ -63,7 +63,7 @@ func marshalCookie(cookie *http.Cookie) (string, error) {
     return encodedText, nil
 }
 
-func unmarshalCookie(str string) (*http.Cookie, error) {
+func UnmarshalCookie(str string) (*http.Cookie, error) {
     decodedText, err := base64.StdEncoding.DecodeString(str)
     if err != nil {
         return nil, err

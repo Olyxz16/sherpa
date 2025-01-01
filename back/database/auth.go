@@ -3,7 +3,8 @@ package database
 import (
 	"fmt"
 	"net/http"
-
+    
+    "github.com/Olyxz16/go-vue-template/database/utils"
 	"github.com/Olyxz16/go-vue-template/logging"
 )
 
@@ -70,7 +71,7 @@ func TokenFromCookie(cookie *http.Cookie, source string) (string, error) {
             JOIN UserAuth ON UserId = UserId
             WHERE cookie=$1 AND source=$2`
 
-    cookieStr, err := marshalCookie(cookie)
+    cookieStr, err := utils.MarshalCookie(cookie)
     if err != nil {
         return "", err
     }

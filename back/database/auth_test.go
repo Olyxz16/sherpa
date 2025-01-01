@@ -3,6 +3,8 @@ package database
 import (
 	"math/rand"
 	"testing"
+
+    "github.com/Olyxz16/go-vue-template/database/utils"
 )
 
 
@@ -113,11 +115,11 @@ func userIdFromPlatformId(platform PlatformUserAuth) (int, bool, error) {
 
 
 func mockPlatformUser() PlatformUserAuth {
-    acces_token, err := randLetterString()
+    acces_token, err := utils.RandLetterString()
     if err != nil {
         panic("Failed generating string")
     }
-    refresh_token, err := randLetterString()
+    refresh_token, err := utils.RandLetterString()
     if err != nil {
         panic("Failed generating string")
     }

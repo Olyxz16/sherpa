@@ -1,4 +1,4 @@
-package database
+package utils
 
 import (
 	"reflect"
@@ -15,7 +15,7 @@ func TestGenerateCookie(t *testing.T) {
         t.Fail()
     }
     for i := 0 ; i < n ; i++ {
-        cookie, err := generateUserCookie()
+        cookie, err := GenerateUserCookie()
         if err != nil {
             t.Log("Failed generating cookie")
             t.Fail()
@@ -41,19 +41,19 @@ func TestGenerateCookie(t *testing.T) {
 func TestMarshalCookie(t *testing.T) {
     n := 100
     for i := 0 ; i < n ; i++ {
-        cookie, err := generateUserCookie() 
+        cookie, err := GenerateUserCookie() 
         if err != nil {
             t.Log("Failed generating cookie")
             t.Fail()
             continue
         }
-        cookieStr, err := marshalCookie(cookie) 
+        cookieStr, err := MarshalCookie(cookie) 
         if err != nil {
             t.Logf("Failed marshalling cookie : %v\n", err)
             t.Fail()
             continue
         }
-        cookieCopy, err := unmarshalCookie(cookieStr)
+        cookieCopy, err := UnmarshalCookie(cookieStr)
         if err != nil {
             t.Logf("Failed unmarshalling cookie : %v\n", err)
             t.Fail()

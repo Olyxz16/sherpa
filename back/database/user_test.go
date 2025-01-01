@@ -3,6 +3,8 @@ package database
 import (
 	"reflect"
 	"testing"
+
+    "github.com/Olyxz16/go-vue-template/database/utils"
 )
 
 /*************************/
@@ -12,7 +14,7 @@ import (
 func TestGetUserFromPlatformID(t *testing.T) {
     New()
     uid := 569991
-    cookie, err := generateUserCookie()
+    cookie, err := utils.GenerateUserCookie()
     if err != nil {
         t.Fatal("Failed generating cookie")
     }
@@ -127,7 +129,7 @@ func TestCreateUser(t *testing.T) {
 /*************/
 
 func mockUserIdFromPlatform(platform PlatformUserAuth) (*UserAuth, error) {
-    cookie, err := generateUserCookie()
+    cookie, err := utils.GenerateUserCookie()
     if err != nil {
         return nil, err
     }
@@ -163,7 +165,7 @@ func insertUser(user UserAuth) error {
         (uid, cookie)
         VALUES ($1, $2)`
 
-    cookieStr, err := marshalCookie(user.Cookie)
+    cookieStr, err := utils.MarshalCookie(user.Cookie)
     if err != nil {
         return err
     }
