@@ -19,9 +19,11 @@ func RegisterRoutes() http.Handler {
     /* Static pages */
     e.GET("/", handlers.Index)
     e.GET("/login", handlers.Index)
+    e.GET("/welcome", handlers.Index)
     
     /* Api endpoints */
     /* Auth */
+    e.POST("/auth/masterkey", handlers.SetUserMasterkey)
     e.GET("/auth/github/callback", github.AuthGithubLogin)
 
     e.GET("/user", handlers.FetchUser)
