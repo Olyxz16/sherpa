@@ -1,10 +1,11 @@
 package github
 
 import (
-	"encoding/json"
 	"fmt"
+    "errors"
 	"net/http"
 	"strings"
+	"encoding/json"
 
     "github.com/Olyxz16/go-vue-template/logging"
 )
@@ -16,6 +17,11 @@ type UserData struct {
     AvatarUrl           string      `json:"avatarUrl"`
     RepoNames           []string    `json:"repositories"`
 }
+
+var (
+    InvalidCookieError = errors.New("Cookie is invalid")
+)
+
 
 func GetUserData(access_token string) (UserData, error) {
     userData := UserData{}
@@ -41,7 +47,6 @@ func getUserName(access_token string, data *UserData) (error) {
     req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", access_token))
     resp, err := http.DefaultClient.Do(req)
     if err != nil {
-        logging.ErrLog(fmt.Sprintf("GetUserName: %v", err.Error()))
         return err
     }
     defer resp.Body.Close()
@@ -49,19 +54,45 @@ func getUserName(access_token string, data *UserData) (error) {
     var body map[string]interface{}
     err = json.NewDecoder(resp.Body).Decode(&body)
     if err != nil {
-        logging.ErrLog(fmt.Sprintf("GetUserName: %v", err.Error()))
         return err
     }
-    
-    data.PlatformID = int(body["id"].(float64))
-    data.Username = body["login"].(string)
-    data.AvatarUrl = body["avatar_url"].(string)
+
+    err = parseUsername(body, data)
+    if err != nil {
+        return err
+    }
 
     return nil
 }
+
+func parseUsername(body map[string]interface{}, data *UserData) (error) {
+    var idJson float64
+    var usernameJson string
+    var avatarUrlJson string
+    var ok bool
+
+    if idJson, ok = body["id"].(float64) ; !ok {
+        return InvalidCookieError
+    }
+    id := int(idJson)
+    if usernameJson, ok = body["login"].(string) ; !ok {
+        return InvalidCookieError
+    }
+    if avatarUrlJson, ok = body["avatar_url"].(string) ; !ok {
+        return InvalidCookieError
+    }
+    
+    data.PlatformID = id
+    data.Username = usernameJson
+    data.AvatarUrl = avatarUrlJson
+
+    return nil    
+}
+
 func getUserRepos(access_token string, data *UserData) (error) {
     result := make([]string, 0)
     url := "https://api.github.com/user/repos"
+    var ferr error
     nextPage := func() bool { 
         req, err := http.NewRequest("GET", url, nil)
         if err != nil {
@@ -90,8 +121,8 @@ func getUserRepos(access_token string, data *UserData) (error) {
         for _, v := range body {
             name, ok := v["name"].(string)
             if !ok {
-                // Handle parsing error
-                continue
+                ferr = InvalidCookieError
+                return false
             }
             result = append(result, name)
         }
@@ -102,6 +133,9 @@ func getUserRepos(access_token string, data *UserData) (error) {
     }
     
     for nextPage() {
+    }
+    if ferr != nil {
+        return ferr
     }
     data.RepoNames = result
     return nil
