@@ -23,6 +23,4 @@ WORKDIR /go/bin/
 COPY --from=build-front /dist/ ${STATIC_DIR}/
 COPY --from=build-back  /build/main ./main
 
-HEALTHCHECK CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
-
 ENTRYPOINT ["./main"]
