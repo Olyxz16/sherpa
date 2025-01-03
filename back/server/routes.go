@@ -1,6 +1,8 @@
 package server
 
 import (
+    "io/fs"
+	"log/slog"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -14,12 +16,12 @@ func RegisterRoutes() http.Handler {
 	e := echo.New()
 	e.Use(middleware.Recover())
     e.Use(middleware.Logger())
-    e.Static("/", staticDir)
+    e.StaticFS("/", staticDir)
     
     /* Static pages */
-    e.GET("/", handlers.Index)
-    e.GET("/login", handlers.Index)
-    e.GET("/welcome", handlers.Index)
+    e.GET("/", staticHandler)
+    e.GET("/login", staticHandler)
+    e.GET("/welcome", staticHandler)
     
     /* Api endpoints */
     /* Auth */
@@ -32,4 +34,17 @@ func RegisterRoutes() http.Handler {
     e.GET("/health", handlers.Health)
 
 	return e
+}
+
+func staticHandler(c echo.Context) error {
+    content, err := fs.ReadFile(staticDir, "index.html")
+    if err != nil {
+        return err
+    }
+    err = c.HTMLBlob(200, content)
+    if err != nil {
+        slog.Warn(err.Error())
+        return err
+    }
+    return nil
 }
