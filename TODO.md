@@ -2,6 +2,7 @@
 An environment storing and sharing tool
 
 ### DOING
+- refactor getUserRepos
 
 ### TODO 
 - Create error views #feat
@@ -12,7 +13,6 @@ An environment storing and sharing tool
 - handle cookie expiration /handlers/auth/generateUserCookie #fix
 - handle empty columns /database/TokenFromCookie #fix
 - handle cookie collision /database/GetUserOrCreateFromAuth
-- refactor getUserRepos
 
 ### DONE
 - Authentication
