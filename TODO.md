@@ -2,7 +2,6 @@
 An environment storing and sharing tool
 
 ### DOING
-- Store previous nav data ? #front
 
 ### TODO 
 - Create error views #feat

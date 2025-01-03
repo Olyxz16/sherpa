@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import EnvTextField from '../components/EnvTextfield.vue'
 import FunctionBar from '../components/FunctionBar.vue'
-import { useCookies } from '@vueuse/integrations/useCookies'
-import fetchUser from '@/lib/fetchUser'
+import { tryLoadUserData } from '@/stores/userStore'
 
-const cookies = useCookies(["session"])
-const session = cookies.get("session")
-if(session) {
-  fetchUser(session)
-}
+tryLoadUserData();
 </script>
 
 <template>
