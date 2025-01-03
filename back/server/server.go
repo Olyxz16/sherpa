@@ -42,11 +42,8 @@ func NewServer() *http.Server {
 
 func init() {
     var err error
-    
-    if err = godotenv.Load() ; err != nil {
-        panic("Error loading environment !")
-    }
-    
+    godotenv.Load()
+
     host = strings.Trim(os.Getenv("HOST"), " ")
     portStr := strings.Trim(os.Getenv("PORT"), " ")
     port, err = strconv.Atoi(portStr)
