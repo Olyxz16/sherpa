@@ -26,6 +26,11 @@ services:
       - "${DB_PORT}:5432"
     volumes:
       - psql_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}
+      interval: 10s
+      retries: 5
+      timeout: 5s
 
 volumes:
   psql_volume:
