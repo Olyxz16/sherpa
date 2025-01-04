@@ -102,12 +102,12 @@ func migrateGithubAuth() {
     New()
     db := dbInstance.db
 
-    allowed, err := isUserMigrated()
+    migrated, err := isUserMigrated()
     if err != nil {
         panic(err)
     }
 
-    if !allowed {
+    if !migrated {
         migrateUserAuth()
     }
 
@@ -125,25 +125,4 @@ func migrateGithubAuth() {
     if err != nil {
         panic(err)
     }
-}
-func isUserMigrated() (bool, error) {
-    db := dbInstance.db
-    q := `SELECT EXISTS (
-    SELECT FROM 
-    pg_tables
-    WHERE 
-    schemaname = 'public' AND 
-    tablename  = 'userauth'
-    );`
-    rows, err := db.Query(q)
-    if err != nil {
-        return false, err
-    }
-    defer rows.Close()
-
-    var result bool
-    rows.Next()
-    rows.Scan(&result)
-
-    return result, nil
 }
