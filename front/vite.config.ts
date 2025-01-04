@@ -12,10 +12,6 @@ export default defineConfig({
     vueJsx(),
     vueDevTools(),
   ],
-  build: {
-    outDir: "../back/static/",
-    emptyOutDir: true
-  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
