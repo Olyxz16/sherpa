@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 
 	"github.com/Olyxz16/go-vue-template/handlers"
+	"github.com/Olyxz16/go-vue-template/handlers/user"
 	"github.com/Olyxz16/go-vue-template/handlers/github"
 )
 
@@ -25,10 +26,10 @@ func RegisterRoutes() http.Handler {
     
     /* Api endpoints */
     /* Auth */
-    e.POST("/auth/masterkey", handlers.SetUserMasterkey)
+    e.POST("/auth/masterkey", user.SetUserMasterkey)
     e.GET("/auth/github/callback", github.AuthGithubLogin)
 
-    e.GET("/user", handlers.FetchUser)
+    e.GET("/user", user.FetchUser)
 
     /* Health checks */
     e.GET("/health", handlers.Health)
