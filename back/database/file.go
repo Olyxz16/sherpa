@@ -9,9 +9,9 @@ import (
 
 type FileData struct {
     ownerId     int
-    repoName    string
     source      string
-    filename    string
+    repoName    string
+    fileName    string
     content     string
 }
 
