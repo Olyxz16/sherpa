@@ -17,40 +17,40 @@ type FileData struct {
 }
 
 // Error handling for missing cookie, repo or file
-func FetchFile(cookie *http.Cookie, repoName, fileName string) (string, error) {
+func FetchFileContent(cookie *http.Cookie, source, repoName, fileName string) (string, error) {
     db := dbInstance.db
-    q := `SELECT content FROM FileData
+    q := `SELECT content, nonce, key FROM FileData
             INNER JOIN (
-                SELECT uid FROM UserAuth
+                SELECT uid, masterkey AS key FROM UserAuth
                 WHERE cookie=$1
             ) 
             ON ownerId = uid
-            WHERE reponame=$2
-            AND filename=$3`
+            WHERE source=$2
+            AND reponame=$3
+            AND filename=$4`
 
     cookieStr, err := utils.MarshalCookie(cookie)
     if err != nil {
         return "", err
     }
-    rows, err := db.Query(q, cookieStr, repoName, fileName)
+    rows, err := db.Query(q, cookieStr, source, repoName, fileName)
     if err != nil {
-        /*var pqerr *pq.Error
-        var ok bool
-        if pqerr, ok = err.(*pq.Error) ; ok {
-        }*/
         return "", err
     }
     defer rows.Close()
 
-    var content string
+    var encryptedContent string
+    var nonce string
+    var key string
     if !rows.Next() {
         return "", errors.New("Missing data")
     }
-    err = rows.Scan(&content)
+    err = rows.Scan(&encryptedContent, &nonce, &key)
     if err != nil {
         return "", err
     }
 
+    content, err := utils.DecryptFile(key, nonce, encryptedContent)
     return content, nil
 }
 
