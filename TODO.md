@@ -5,6 +5,7 @@ An environment storing and sharing tool
 - refactor getUserRepos
 
 ### TODO 
+- Refactor db functions to avoid using cookies without multiple db calls
 - Create error views #feat
 - Save data #back
 - Fetch data from file on selection #front
@@ -21,3 +22,5 @@ An environment storing and sharing tool
 - Login view #front
 - Main page #front
 
+### QUESTIONS
+- Add file encryption key (derived from masterkey) in UserAuth ?
