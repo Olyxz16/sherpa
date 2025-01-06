@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+    "errors"
     "net/http"
 
     "github.com/Olyxz16/go-vue-template/database/utils"
@@ -14,6 +15,37 @@ type UserAuth struct {
     Cookie              *http.Cookie
     EncodedMasterkey    string
     Salt                string
+}
+
+
+func getUserFromCookie(cookie *http.Cookie) (*UserAuth, error) {
+    db := dbInstance.db
+    
+    q := `SELECT uid, masterkey, salt FROM UserAuth
+            WHERE cookie=$1`
+
+    cookieStr, err := utils.MarshalCookie(cookie)
+    if err != nil {
+        return nil, err
+    }
+
+    rows, err := db.Query(q, cookieStr)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var userAuth UserAuth
+    if !rows.Next() {
+        return nil, errors.New("Missing data")
+    }
+    err = rows.Scan(&userAuth.Uid, &userAuth.EncodedMasterkey, &userAuth.Salt)
+    if err != nil {
+        return nil, err
+    }
+    userAuth.Cookie = cookie
+
+    return &userAuth, nil
 }
 
 
