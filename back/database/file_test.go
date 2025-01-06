@@ -6,13 +6,16 @@ import (
 	"github.com/Olyxz16/go-vue-template/database/utils"
 )
 
-func TestFetchUserUnencryptedFileData(t *testing.T) {
+func TestFetchUserFileData(t *testing.T) {
     New()
     user, err := mockUserAuth()
     if err != nil {
         t.Fatalf("Error mocking userauth : %v", err)
     }
-    fileData := mockFileDataFromUserId(user.Uid)
+    expectedContent, fileData, err := mockFileDataFromUser(*user)
+    if err != nil {
+        t.Fatalf("Error mocking file data : %v", err)
+    }
     
     err = clean()
     if err != nil {
@@ -27,15 +30,15 @@ func TestFetchUserUnencryptedFileData(t *testing.T) {
         t.Fatalf("Error inserting fileData : %v", err)
     }
     
-    content, err := FetchFileContent(user.Cookie, fileData.Source, fileData.RepoName, fileData.FileName)
+    actualContent, err := FetchFileContent(user.Cookie, fileData.Source, fileData.RepoName, fileData.FileName)
     if err != nil {
         t.Fatalf("Error in FetchFile : %v", err)
     }
 
-    if content != fileData.B64Content {
+    if expectedContent != actualContent {
         t.Fatalf(`Error: file content should be equal
                     expected : %s
-                    actual : %s`, fileData.B64Content, content)
+                    actual : %s`, expectedContent, actualContent)
     }
     
 }
