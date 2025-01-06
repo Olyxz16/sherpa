@@ -49,7 +49,7 @@ func mockFileDataFromUser(userAuth UserAuth) (string, *FileData, error) {
     if err != nil {
         return "", nil, err
     }
-    encodedContent, _, err := utils.EncryptFile(userAuth.EncodedMasterkey, content)
+    encodedContent, _, err := utils.EncryptFile(userAuth.Filekey, content)
     if err != nil {
         return "", nil, err
     }

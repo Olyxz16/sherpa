@@ -21,7 +21,7 @@ func FetchFileContent(cookie *http.Cookie, source, repoName, fileName string) (s
     db := dbInstance.db
     q := `SELECT content, nonce, key FROM FileData
             INNER JOIN (
-                SELECT uid, masterkey AS key FROM UserAuth
+                SELECT uid, filekey AS key FROM UserAuth
                 WHERE cookie=$1
             ) 
             ON ownerId = uid
@@ -62,7 +62,7 @@ func SaveFile(cookie *http.Cookie, source, repoName, fileName, content string) e
         return err
     }
 
-    encryptedContent, nonce, err := utils.EncryptFile(user.EncodedMasterkey, content)
+    encryptedContent, nonce, err := utils.EncryptFile(user.Filekey, content)
     if err != nil {
         return err
     }
