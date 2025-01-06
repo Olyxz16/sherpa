@@ -131,13 +131,23 @@ func TestCreateUser(t *testing.T) {
 
 func mockUserAuth() (*UserAuth, error) {
     userId := rand.Int() % 100
+    inputkey, err := utils.RandLetterString()
+    if err != nil {
+        return nil, err
+    }
     cookie, err := utils.GenerateUserCookie()
+    if err != nil {
+        return nil, err
+    }
+    encodedMasterkey, b64salt, _, err := utils.HashFromMasterkey(inputkey)
     if err != nil {
         return nil, err
     }
     user := &UserAuth{
         Uid: userId,
         Cookie: cookie,
+        EncodedMasterkey: encodedMasterkey,
+        Salt: b64salt,
     }
     return user, nil
 }
