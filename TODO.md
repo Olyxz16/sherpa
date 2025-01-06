@@ -2,9 +2,13 @@
 An environment storing and sharing tool
 
 ### DOING
-- refactor getUserRepos
+- HEAVY REFACTOR
+  - db Scan on struct
+  - define convention for masterkey and filekey
+  - put abstraction over encoded values to avoid issues
 
 ### TODO 
+- refactor getUserRepos
 - Refactor db functions to avoid using cookies without multiple db calls
 - Create error views #feat
 - Save data #back
