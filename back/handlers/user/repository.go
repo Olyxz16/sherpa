@@ -14,6 +14,10 @@ func FetchUserRepoFiles(c echo.Context) error {
     if err != nil {
         return c.JSON(401, `{message: "Unauthorized"}`)
     }
+    source := c.QueryParam("source")
+    if source == "" {
+        return c.JSON(400, `{message: "Missing source"}`)
+    }
     repoName := c.QueryParam("repo")
     if repoName == "" {
         return c.JSON(400, `{message: "Missing repository name"}`)
@@ -23,7 +27,7 @@ func FetchUserRepoFiles(c echo.Context) error {
         return c.JSON(400, `{message: "Missing file name"}`)
     }
     
-    content, err := database.FetchFile(cookie, repoName, fileName)
+    content, err := database.FetchFileContent(cookie, source, repoName, fileName)
     if err != nil {
         // handle different errors
         return c.JSON(500, `{message: "Missing data"}`)
