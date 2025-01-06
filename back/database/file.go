@@ -54,7 +54,46 @@ func FetchFile(cookie *http.Cookie, repoName, fileName string) (string, error) {
     return content, nil
 }
 
-func SaveFile(cookie *http.Cookie, repoName, fileName, content string) error {
+func SaveFile(cookie *http.Cookie, source, repoName, fileName, content string) error {
+    db := dbInstance.db
+
+    user, err := getUserFromCookie(cookie)
+    if err != nil {
+        return err
+    }
+
+    encryptedContent, nonce, err := utils.EncryptFile(user.EncodedMasterkey, content)
+    if err != nil {
+        return err
+    }
+
+    q := `INSERT INTO FileData
+        (ownerId, source, repoName, fileName, encodedContent, nonce)
+        VALUES ($1, $2, $3, $4, $5, $6)`
+
+    tx, err := db.Begin()
+    if err != nil {
+        return err
+    }
+    defer tx.Rollback()
+
+    rows, err := tx.Query(q, user.Uid, source, repoName, fileName, encryptedContent, nonce)
+    if err != nil {
+        return err
+    }
+    defer rows.Close()
+
+    var uid int
+    if rows.Next() {
+        if err := rows.Scan(&uid) ; err != nil {
+            return err
+        }
+    }
+
+    err = tx.Commit()
+    if err != nil {
+        return err
+    }
     return nil
 }
 
