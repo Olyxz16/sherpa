@@ -25,15 +25,15 @@ func TestFetchUserUnencryptedFileData(t *testing.T) {
         t.Fatalf("Error inserting fileData : %v", err)
     }
     
-    content, err := FetchFile(user.Cookie, fileData.repoName, fileData.fileName)  
+    content, err := FetchFileContent(user.Cookie, fileData.Source, fileData.RepoName, fileData.FileName)
     if err != nil {
         t.Fatalf("Error in FetchFile : %v", err)
     }
 
-    if content != fileData.content {
+    if content != fileData.B64Content {
         t.Fatalf(`Error: file content should be equal
                     expected : %s
-                    actual : %s`, fileData.content, content)
+                    actual : %s`, fileData.B64Content, content)
     }
     
 }
@@ -41,11 +41,11 @@ func TestFetchUserUnencryptedFileData(t *testing.T) {
 
 func mockFileDataFromUserId(userId int) (*FileData) {
     return &FileData{
-        ownerId: userId,
-        source: "github.com",
-        repoName: "TestRepository",
-        fileName: ".env",
-        content: "DEBUG=true\nPORT=80",
+        OwnerId: userId,
+        Source: "github.com",
+        RepoName: "TestRepository",
+        FileName: ".env",
+        B64Content: "DEBUG=true\nPORT=80",
     }
 }
 
@@ -55,6 +55,6 @@ func insertFileData(file FileData) (error) {
         (ownerId, source, reponame, filename, content)
         VALUES ($1, $2, $3, $4, $5)`
 
-    _, err := db.Exec(q, file.ownerId, file.source, file.repoName, file.fileName, file.content)
+    _, err := db.Exec(q, file.OwnerId, file.Source, file.RepoName, file.FileName, file.B64Content)
     return err
 }

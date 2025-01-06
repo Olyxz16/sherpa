@@ -8,11 +8,12 @@ import (
 )
 
 type FileData struct {
-    ownerId     int
-    source      string
-    repoName    string
-    fileName    string
-    content     string
+    OwnerId     int
+    Source      string
+    RepoName    string
+    FileName    string
+    B64Content  string
+    B64Nonce    string
 }
 
 // Error handling for missing cookie, repo or file
@@ -80,7 +81,8 @@ func migrateFileData() {
         repoName            TEXT        DEFAULT '',
         source              TEXT        DEFAULT '',
         filename            TEXT        DEFAULT '.env',
-        content             TEXT        DEFAULT ''
+        b64Content          TEXT        DEFAULT '',
+        b64Nonce            TEXT        DEFAULT ''
     )`
     _, err = db.Exec(q)
     if err != nil {
