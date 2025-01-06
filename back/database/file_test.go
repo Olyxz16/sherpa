@@ -1,7 +1,9 @@
 package database
 
 import (
-    "testing"
+	"testing"
+
+	"github.com/Olyxz16/go-vue-template/database/utils"
 )
 
 func TestFetchUserUnencryptedFileData(t *testing.T) {
@@ -39,14 +41,23 @@ func TestFetchUserUnencryptedFileData(t *testing.T) {
 }
 
 
-func mockFileDataFromUserId(userId int) (*FileData) {
-    return &FileData{
-        OwnerId: userId,
+func mockFileDataFromUser(userAuth UserAuth) (string, *FileData, error) {
+    content, err := utils.RandLetterString()
+    if err != nil {
+        return "", nil, err
+    }
+    encodedContent, _, err := utils.EncryptFile(userAuth.EncodedMasterkey, content)
+    if err != nil {
+        return "", nil, err
+    }
+    fileData := &FileData{
+        OwnerId: userAuth.Uid,
         Source: "github.com",
         RepoName: "TestRepository",
         FileName: ".env",
-        B64Content: "DEBUG=true\nPORT=80",
+        B64Content: encodedContent,
     }
+    return "", fileData, nil
 }
 
 func insertFileData(file FileData) (error) {
