@@ -30,6 +30,7 @@ func RegisterRoutes() http.Handler {
     e.GET("/auth/github/callback", github.AuthGithubLogin)
 
     e.GET("/user", user.FetchUser)
+    e.GET("/file", user.FetchUserRepoFile)
 
     /* Health checks */
     e.GET("/health", handlers.Health)

@@ -9,7 +9,7 @@ import (
 )
 
 
-func FetchUserRepoFiles(c echo.Context) error {
+func FetchUserRepoFile(c echo.Context) error {
     cookie, err := c.Cookie("session")
     if err != nil {
         return c.JSON(401, `{message: "Unauthorized"}`)
