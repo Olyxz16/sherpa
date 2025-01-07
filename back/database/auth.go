@@ -3,8 +3,8 @@ package database
 import (
 	"fmt"
 	"net/http"
-    
-    "github.com/Olyxz16/go-vue-template/database/utils"
+
+	"github.com/Olyxz16/go-vue-template/database/utils"
 	"github.com/Olyxz16/go-vue-template/logging"
 )
 
@@ -61,7 +61,10 @@ func AuthenticateUser(auth PlatformUserAuth) (*UserAuth, bool, error) {
     }
 
     err = tx.Commit()
-    return user, true, err
+    if err != nil {
+        return nil, false, err
+    }
+    return user, true, nil
 }
 
 // TODO rows protection when rows length 0
@@ -75,15 +78,10 @@ func TokenFromCookie(cookie *http.Cookie, source string) (string, error) {
     if err != nil {
         return "", err
     }
-    rows, err := db.Query(q, cookieStr, source)
-    if err != nil {
-        return "", err
-    }
-    defer rows.Close()
+    row := db.QueryRow(q, cookieStr, source)
 
     var access_token string
-    rows.Next()
-    err = rows.Scan(&access_token)
+    err = row.Scan(&access_token)
     if err != nil {
         return "", err
     }
