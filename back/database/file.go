@@ -64,8 +64,11 @@ func SaveFile(cookie *http.Cookie, source, repoName, fileName, content string) e
 
     q := `INSERT INTO FileData
         (ownerId, source, repoName, fileName, b64content, b64nonce)
-        VALUES ($1, $2, $3, $4, $5, $6)`
-
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT (ownerId, source, repoName, fileName)
+        DO UPDATE SET
+            b64content=EXCLUDED.b64content,
+            b64nonce=EXCLUDED.b64nonce`
     tx, err := db.Begin()
     if err != nil {
         return err
