@@ -2,13 +2,9 @@
 An environment storing and sharing tool
 
 ### DOING
-- HEAVY REFACTOR
-  - db Scan on struct
-  - define convention for masterkey and filekey
-  - put abstraction over encoded values to avoid issues
 
 ### TODO 
-- refactor getUserRepos
+- refactor getUserRepos #back
 - Refactor db functions to avoid using cookies without multiple db calls
 - Create error views #feat
 - Save data #back
@@ -18,6 +14,7 @@ An environment storing and sharing tool
 - handle cookie expiration /handlers/auth/generateUserCookie #fix
 - handle empty columns /database/TokenFromCookie #fix
 - handle cookie collision /database/GetUserOrCreateFromAuth
+- remove user duplication prevention in sql request since already tested before ? @AuthenticateUser #back
 
 ### DONE
 - Authentication
@@ -25,6 +22,3 @@ An environment storing and sharing tool
 - Select repository #front
 - Login view #front
 - Main page #front
-
-### QUESTIONS
-- Add file encryption key (derived from masterkey) in UserAuth ?
