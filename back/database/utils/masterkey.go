@@ -38,8 +38,8 @@ func HashFromMasterkey(masterkey string) (encodedHash, b64Salt, b64Hash string, 
     }
     hash := argon2.IDKey([]byte(masterkey), salt, p.iterations, p.memory, p.thread, p.keyLength)
 
-    b64Salt = base64.RawStdEncoding.EncodeToString(salt)
-    b64Hash = base64.RawStdEncoding.EncodeToString(hash)
+    b64Salt = base64.StdEncoding.EncodeToString(salt)
+    b64Hash = base64.StdEncoding.EncodeToString(hash)
 
     encodedHash = fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, p.memory, p.iterations, p.thread, b64Salt, b64Hash)
     
@@ -82,13 +82,13 @@ func decodeHash(encodedHash string) (par *params, salt, hash []byte, err error) 
         return nil, nil, nil, err
     }
 
-    salt, err = base64.RawStdEncoding.Strict().DecodeString(vals[4])
+    salt, err = base64.StdEncoding.Strict().DecodeString(vals[4])
     if err != nil {
         return nil, nil, nil, err
     }
     par.saltLength = uint32(len(salt))
 
-    hash, err = base64.RawStdEncoding.Strict().DecodeString(vals[5])
+    hash, err = base64.StdEncoding.Strict().DecodeString(vals[5])
     if err != nil {
         return nil, nil, nil, err
     }
