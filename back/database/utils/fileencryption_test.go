@@ -5,20 +5,19 @@ import (
 )
 
 func TestFileEncryption(t *testing.T) {
-    key := "ighjenoqiknzjiuhankplskinshutgnt"
-    content := "filecontent"
-    encryptedContent, encodedNonce, err := EncryptFile(key, content)
+    key := []byte("ighjenoqiknzjiuhankplskinshutgnt")
+    expected := "filecontent"
+    b64content, b64nonce, err := EncryptFile(key, expected)
     if err != nil {
         t.Fatalf("Error encrypting file : %v", err)
     }
-    t.Logf("%v %v", encryptedContent, encodedNonce)
-    decryptedContent, err := DecryptFile(key, encodedNonce, encryptedContent)
+    actual, err := DecryptFile(key, b64nonce, b64content)
     if err != nil {
         t.Fatalf("Error decrypting file : %v", err)
     }
-    if decryptedContent != content {
+    if expected != actual {
         t.Fatalf(`Contents don't match
                 expected : %v
-                Actual : %v`, content, decryptedContent)
+                actual : %v`, expected, actual)
     }
 }

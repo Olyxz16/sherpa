@@ -16,14 +16,14 @@ type UserAuth struct {
     Cookie              *http.Cookie
     EncodedMasterkey    string
     Salt                string
-    Filekey             string
+    B64filekey             string
 }
 
 
 func getUserFromCookie(cookie *http.Cookie) (*UserAuth, error) {
     db := dbInstance.db
     
-    q := `SELECT uid, masterkey, salt, filekey FROM UserAuth
+    q := `SELECT uid, masterkey, salt, b64filekey FROM UserAuth
             WHERE cookie=$1`
 
     cookieStr, err := utils.MarshalCookie(cookie)
@@ -41,7 +41,7 @@ func getUserFromCookie(cookie *http.Cookie) (*UserAuth, error) {
     if !rows.Next() {
         return nil, errors.New("Missing data")
     }
-    err = rows.Scan(&userAuth.Uid, &userAuth.EncodedMasterkey, &userAuth.Salt, &userAuth.Filekey)
+    err = rows.Scan(&userAuth.Uid, &userAuth.EncodedMasterkey, &userAuth.Salt, &userAuth.B64filekey)
     if err != nil {
         return nil, err
     }
@@ -53,7 +53,7 @@ func getUserFromCookie(cookie *http.Cookie) (*UserAuth, error) {
 
 func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
     db := dbInstance.db
-    q := `SELECT uid, cookie, encodedMasterkey, filekey FROM UserAuth
+    q := `SELECT uid, cookie, encodedMasterkey, b64filekey FROM UserAuth
             JOIN PlatformUserAuth ON uid = userId
             WHERE platformId=$1`
 
@@ -77,7 +77,7 @@ func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
         if cookie, err = utils.UnmarshalCookie(cookieStr) ; err != nil {
             return nil, err    
         }
-        result = &UserAuth{ Uid: uid, Cookie: cookie, EncodedMasterkey: encodedMasterkey, Filekey: filekey }
+        result = &UserAuth{ Uid: uid, Cookie: cookie, EncodedMasterkey: encodedMasterkey, B64filekey: filekey }
     }
     return result, nil
 }
@@ -138,7 +138,7 @@ func SetUserMasterkey(cookie *http.Cookie, masterkey string) (error) {
     q := `UPDATE UserAuth
         SET encodedMasterkey=$1,
         salt=$2,
-        filekey=$3
+        b64filekey=$3
         WHERE cookie=$4`
 
     tx, err := db.Begin()
@@ -189,7 +189,7 @@ func migrateUserAuth() {
         cookie              TEXT UNIQUE DEFAULT '',
         encodedMasterkey    TEXT        DEFAULT '',
         salt                TEXT        DEFAULT '',
-        filekey             TEXT        DEFAULT ''
+        b64filekey          TEXT        DEFAULT ''
     )`
     _, err := db.Exec(q)
     if err != nil {

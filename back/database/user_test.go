@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/base64"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -139,7 +140,12 @@ func mockUserAuth() (*UserAuth, error) {
     if err != nil {
         return nil, err
     }
-    encodedMasterkey, b64salt, _, err := utils.HashFromMasterkey(inputkey)
+    encodedMasterkey, b64salt, b64hash, err := utils.HashFromMasterkey(inputkey)
+    hash, err := base64.StdEncoding.DecodeString(b64hash)
+    if err != nil {
+        return nil, err
+    }
+    _, _, b64filekey, err := utils.HashFromMasterkey(string(hash))
     if err != nil {
         return nil, err
     }
@@ -148,6 +154,7 @@ func mockUserAuth() (*UserAuth, error) {
         Cookie: cookie,
         EncodedMasterkey: encodedMasterkey,
         Salt: b64salt,
+        B64filekey: b64filekey,
     }
     return user, nil
 }

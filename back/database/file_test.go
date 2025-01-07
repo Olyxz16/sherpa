@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/base64"
 	"testing"
 
 	"github.com/Olyxz16/go-vue-template/database/utils"
@@ -49,7 +50,9 @@ func mockFileDataFromUser(userAuth UserAuth) (string, *FileData, error) {
     if err != nil {
         return "", nil, err
     }
-    encodedContent, _, err := utils.EncryptFile(userAuth.Filekey, content)
+    
+    filekey, err := base64.StdEncoding.DecodeString(userAuth.B64filekey)
+    b64content, b64nonce, err := utils.EncryptFile(filekey, content)
     if err != nil {
         return "", nil, err
     }
@@ -58,7 +61,8 @@ func mockFileDataFromUser(userAuth UserAuth) (string, *FileData, error) {
         Source: "github.com",
         RepoName: "TestRepository",
         FileName: ".env",
-        B64Content: encodedContent,
+        B64Content: b64content,
+        B64Nonce: b64nonce,
     }
     return "", fileData, nil
 }
@@ -66,9 +70,9 @@ func mockFileDataFromUser(userAuth UserAuth) (string, *FileData, error) {
 func insertFileData(file FileData) (error) {
     db := dbInstance.db
     q := `INSERT INTO FileData
-        (ownerId, source, reponame, filename, content)
-        VALUES ($1, $2, $3, $4, $5)`
+        (ownerId, source, reponame, filename, b64content, b64nonce)
+        VALUES ($1, $2, $3, $4, $5, $6)`
 
-    _, err := db.Exec(q, file.OwnerId, file.Source, file.RepoName, file.FileName, file.B64Content)
+    _, err := db.Exec(q, file.OwnerId, file.Source, file.RepoName, file.FileName, file.B64Content, file.B64Nonce)
     return err
 }

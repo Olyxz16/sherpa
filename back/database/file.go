@@ -1,6 +1,7 @@
 package database
 
 import (
+	"encoding/base64"
 	"errors"
 	"net/http"
 
@@ -19,9 +20,9 @@ type FileData struct {
 // Error handling for missing cookie, repo or file
 func FetchFileContent(cookie *http.Cookie, source, repoName, fileName string) (string, error) {
     db := dbInstance.db
-    q := `SELECT content, nonce, key FROM FileData
+    q := `SELECT b64content, b64nonce, b64filekey FROM FileData
             INNER JOIN (
-                SELECT uid, filekey AS key FROM UserAuth
+                SELECT uid, b64filekey FROM UserAuth
                 WHERE cookie=$1
             ) 
             ON ownerId = uid
@@ -39,18 +40,19 @@ func FetchFileContent(cookie *http.Cookie, source, repoName, fileName string) (s
     }
     defer rows.Close()
 
-    var encryptedContent string
-    var nonce string
-    var key string
+    var b64content string
+    var b64nonce string
+    var b64filekey string
     if !rows.Next() {
         return "", errors.New("Missing data")
     }
-    err = rows.Scan(&encryptedContent, &nonce, &key)
+    err = rows.Scan(&b64content, &b64nonce, &b64filekey)
     if err != nil {
         return "", err
     }
-
-    content, err := utils.DecryptFile(key, nonce, encryptedContent)
+    
+    filekey, err := base64.StdEncoding.DecodeString(b64filekey)
+    content, err := utils.DecryptFile(filekey, b64nonce, b64content)
     return content, nil
 }
 
@@ -61,14 +63,15 @@ func SaveFile(cookie *http.Cookie, source, repoName, fileName, content string) e
     if err != nil {
         return err
     }
-
-    encryptedContent, nonce, err := utils.EncryptFile(user.Filekey, content)
+    
+    filekey, err := base64.StdEncoding.DecodeString(user.B64filekey)
+    b64content, b64nonce, err := utils.EncryptFile(filekey, content)
     if err != nil {
         return err
     }
 
     q := `INSERT INTO FileData
-        (ownerId, source, repoName, fileName, encodedContent, nonce)
+        (ownerId, source, repoName, fileName, b64content, b64nonce)
         VALUES ($1, $2, $3, $4, $5, $6)`
 
     tx, err := db.Begin()
@@ -77,17 +80,9 @@ func SaveFile(cookie *http.Cookie, source, repoName, fileName, content string) e
     }
     defer tx.Rollback()
 
-    rows, err := tx.Query(q, user.Uid, source, repoName, fileName, encryptedContent, nonce)
+    _, err = tx.Exec(q, user.Uid, source, repoName, fileName, b64content, b64nonce)
     if err != nil {
         return err
-    }
-    defer rows.Close()
-
-    var uid int
-    if rows.Next() {
-        if err := rows.Scan(&uid) ; err != nil {
-            return err
-        }
     }
 
     err = tx.Commit()
