@@ -206,15 +206,13 @@ func isUserMigrated() (bool, error) {
     schemaname = 'public' AND
     tablename  = 'userauth'
     );`
-    rows, err := db.Query(q)
-    if err != nil {
-        return false, err
-    }
-    defer rows.Close()
+    row := db.QueryRow(q)
 
     var result bool
-    rows.Next()
-    rows.Scan(&result)
+    err := row.Scan(&result)
+    if err != nil {
+        panic(err)
+    }
 
     return result, nil
 }

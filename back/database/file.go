@@ -2,7 +2,6 @@ package database
 
 import (
 	"encoding/base64"
-	"errors"
 	"net/http"
 
 	"github.com/Olyxz16/go-vue-template/database/utils"
@@ -34,19 +33,12 @@ func FetchFileContent(cookie *http.Cookie, source, repoName, fileName string) (s
     if err != nil {
         return "", err
     }
-    rows, err := db.Query(q, cookieStr, source, repoName, fileName)
-    if err != nil {
-        return "", err
-    }
-    defer rows.Close()
+    row := db.QueryRow(q, cookieStr, source, repoName, fileName)
 
     var b64content string
     var b64nonce string
     var b64filekey string
-    if !rows.Next() {
-        return "", errors.New("Missing data")
-    }
-    err = rows.Scan(&b64content, &b64nonce, &b64filekey)
+    err = row.Scan(&b64content, &b64nonce, &b64filekey)
     if err != nil {
         return "", err
     }
