@@ -9,6 +9,32 @@ import (
 )
 
 
+type saveFileRequest struct {
+    Source      string      `json:"source"`
+    RepoName    string      `json:"repoName"`
+    FileName    string      `json:"fileName"`
+    Content     string      `json:"content"`
+}
+
+func SaveUserRepoFile(c echo.Context) error {
+    cookie, err := c.Cookie("session")
+    if err != nil {
+        return c.JSON(401, `{message: "Unauthorized"}`)
+    }
+    
+    var sfr saveFileRequest
+    err = c.Bind(&sfr)
+    if err != nil {
+        return c.JSON(500, `{message: "Bad request"}`)
+    }
+    
+    err = database.SaveFile(cookie, sfr.Source, sfr.RepoName, sfr.FileName, sfr.Content)
+    if err != nil {
+        return c.JSON(500, `{message: "Missing data"}`)
+    }
+    return c.JSON(200, `{message: "OK"}`)
+}
+
 func FetchUserRepoFile(c echo.Context) error {
     cookie, err := c.Cookie("session")
     if err != nil {

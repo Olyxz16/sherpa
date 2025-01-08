@@ -31,6 +31,7 @@ func RegisterRoutes() http.Handler {
 
     e.GET("/user", user.FetchUser)
     e.GET("/file", user.FetchUserRepoFile)
+    e.POST("/file", user.SaveUserRepoFile)
 
     /* Health checks */
     e.GET("/health", handlers.Health)
