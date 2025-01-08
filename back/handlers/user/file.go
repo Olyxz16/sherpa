@@ -61,9 +61,10 @@ func FetchUserRepoFile(c echo.Context) error {
 
     response := make(map[string]interface{})
     response["content"] = content
-    json, err := json.Marshal(response)
+    jsonBytes, err := json.Marshal(response)
     if err != nil {
         return c.JSON(500, `{message: "Error fetch file"}`)
     }
+    json := string(jsonBytes)
     return c.JSON(200, json)
 }
