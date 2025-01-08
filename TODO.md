@@ -2,7 +2,6 @@
 An environment storing and sharing tool
 
 ### DOING
-- Save data #back
 - Fetch data from file on selection #front
 
 ### TODO 
@@ -20,6 +19,7 @@ An environment storing and sharing tool
 - remove user duplication prevention in sql request since already tested before ? @AuthenticateUser #back
 
 ### DONE
+- Save data #back
 - Authentication
 - Select file #front
 - Select repository #front
