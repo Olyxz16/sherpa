@@ -44,7 +44,13 @@ func FetchFileContent(cookie *http.Cookie, source, repoName, fileName string) (s
     }
     
     filekey, err := base64.StdEncoding.DecodeString(b64filekey)
+    if err != nil {
+        return "", err
+    }
     content, err := utils.DecryptFile(filekey, b64nonce, b64content)
+    if err != nil {
+        return "", err
+    }
     return content, nil
 }
 
