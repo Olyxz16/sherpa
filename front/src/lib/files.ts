@@ -33,11 +33,11 @@ export async function saveFile(source: string, repoName: string, fileName: strin
 }
 
 export async function fetchFile(source: string, repoName: string, fileName: string): Promise<string> {
-  const url = "/file";
+  const url = "/file?";
   const param = new URLSearchParams({
     source: source,
-    repoName: repoName,
-    fileName: fileName
+    repo: repoName,
+    file: fileName
   });
   const query = url + param.toString();
   let content = "";
@@ -46,7 +46,8 @@ export async function fetchFile(source: string, repoName: string, fileName: stri
     if(!resp.ok) {
       return ""
     }
-    const json = await resp.json() as FetchFileResponse
+    const jsonStr = await resp.json() as string
+    const json = JSON.parse(jsonStr) as FetchFileResponse
     content = json.content;
   } catch(e) {
     return ""

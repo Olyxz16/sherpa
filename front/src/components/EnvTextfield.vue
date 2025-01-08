@@ -1,15 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
 import { Textarea } from "@/components/ui/textarea"
-import { useWorkstationStore } from '@/stores/workstationStore'
 
 const placeholder = "HOST=\nPORT=";
 
+const modelValue = ref('');
+import { useWorkstationStore } from '@/stores/workstationStore'
 const { updateFileContent, saveCurrentFile } = useWorkstationStore();
+const wsStore = useWorkstationStore();
+const { fileContent } = storeToRefs(wsStore);
+watch(fileContent, async (newVal, oldVal) => {
+  modelValue.value = newVal;
+})
 </script>
 
 <template>
-    <Textarea class="textarea" @keydown.enter.shift.exact.prevent="saveCurrentFile" @keydown.s.ctrl.exact.prevent="saveCurrentFile" @update:modelValue="updateFileContent" :placeholder="placeholder"/>
+    <Textarea class="textarea" :modelValue="modelValue" @keydown.enter.shift.exact.prevent="saveCurrentFile" @keydown.s.ctrl.exact.prevent="saveCurrentFile" @update:modelValue="updateFileContent" :placeholder="placeholder"/>
 </template>
 
 <style scoped>
