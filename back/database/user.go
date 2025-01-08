@@ -23,7 +23,7 @@ type UserAuth struct {
 func getUserFromCookie(cookie *http.Cookie) (*UserAuth, error) {
     db := dbInstance.db
     
-    q := `SELECT uid, masterkey, salt, b64filekey FROM UserAuth
+    q := `SELECT uid, encodedMasterkey, salt, b64filekey FROM UserAuth
             WHERE cookie=$1`
 
     cookieStr, err := utils.MarshalCookie(cookie)
