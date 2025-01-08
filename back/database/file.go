@@ -107,11 +107,12 @@ func migrateFileData() {
 
     q := `CREATE TABLE IF NOT EXISTS FileData (
         ownerId             INT         REFERENCES UserAuth(uid),
-        repoName            TEXT        DEFAULT '',
-        source              TEXT        DEFAULT '',
-        filename            TEXT        DEFAULT '.env',
-        b64Content          TEXT        DEFAULT '',
-        b64Nonce            TEXT        DEFAULT ''
+        source              TEXT        NOT NULL,
+        repoName            TEXT        NOT NULL,
+        filename            TEXT        NOT NULL,
+        b64Content          TEXT,
+        b64Nonce            TEXT,
+        PRIMARY KEY(ownerId, source, repoName, fileName)
     )`
     _, err = db.Exec(q)
     if err != nil {
