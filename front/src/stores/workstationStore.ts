@@ -3,33 +3,35 @@ import { defineStore } from 'pinia';
 import { saveFile, fetchFile } from '@/lib/files'
 
 export const useWorkstationStore = defineStore('workStationStore', () => {
-  const currRepoNameRef = ref('');
-  const currFileNameRef = ref('');
-  const fileContentRef = ref('');
-
-  const repoName = () => currRepoNameRef.value;
-  const fileName = () => currFileNameRef.value;
-  const fileContent = () => fileContentRef.value;
+  const currRepoName = ref('');
+  const currFileName = ref('');
+  const fileContent = ref('');
 
   function setCurrentRepo(repoName : string) {
-    currRepoNameRef.value = repoName;
-    currFileNameRef.value = '.env';
-    fileContentRef.value = ''; // Fetch file data here ?
+    currRepoName.value = repoName;
+    currFileName.value = '.env';
+    fetchCurrentFile()
+    .then(val => {
+        fileContent.value = val;
+      });
   }
   function setCurrentFile(fileName : string) {
-    currFileNameRef.value = fileName;
-    fileContentRef.value = ''; // Fetch file data here ?
+    currFileName.value = fileName;
+    fetchCurrentFile()
+    .then(val => {
+        fileContent.value = val;
+      });
   }
   function updateFileContent(payload: string | number) {
-    fileContentRef.value = payload.toString();
+    fileContent.value = payload.toString();
   };
 
   async function saveCurrentFile() {
     // Incorporate source in repo data
     const source = "github.com";
-    const repoName = currRepoNameRef.value;
-    const fileName = currFileNameRef.value;
-    const content = fileContentRef.value;
+    const repoName = currRepoName.value;
+    const fileName = currFileName.value;
+    const content = fileContent.value;
     try {
       const res = await saveFile("github.com", repoName, fileName, content);
     } catch(e) {
@@ -37,12 +39,12 @@ export const useWorkstationStore = defineStore('workStationStore', () => {
       console.log("File not saved");
     }
   }
-  async function fetchCurrentFile() {
+  async function fetchCurrentFile(): Promise<string> {
     const source = "github.com";
-    const repoName = currRepoNameRef.value;
-    const fileName = currFileNameRef.value;
+    const repoName = currRepoName.value;
+    const fileName = currFileName.value;
     const res = await fetchFile(source, repoName, fileName);
-    fileContentRef.value = res;
+    return res;
   }
-  return { repoName, fileName, fileContent, setCurrentRepo, setCurrentFile, updateFileContent, saveCurrentFile, fetchCurrentFile };
+  return { currRepoName, currFileName, fileContent, setCurrentRepo, setCurrentFile, updateFileContent, saveCurrentFile, fetchCurrentFile };
 });
