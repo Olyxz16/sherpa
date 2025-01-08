@@ -2,13 +2,16 @@
 An environment storing and sharing tool
 
 ### DOING
+- Save data #back
+- Fetch data from file on selection #front
 
 ### TODO 
+- data validation
+- handle front end error display
+- handle front end succes display
 - refactor getUserRepos #back
 - Refactor db functions to avoid using cookies without multiple db calls
 - Create error views #feat
-- Save data #back
-- Fetch data from file on selection #front
 - error handling /handlers/auth/getUserRepos #fix
 - error handling /handlers/auth/AuthGithubLogin #fix
 - handle cookie expiration /handlers/auth/generateUserCookie #fix
