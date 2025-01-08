@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Olyxz16/go-vue-template/database/utils"
+	"github.com/Olyxz16/sherpa/database/utils"
 )
 
 /*************************/

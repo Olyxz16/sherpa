@@ -11,7 +11,7 @@ import (
 	"time"
     "embed"
 
-	"github.com/Olyxz16/go-vue-template/server"
+	"github.com/Olyxz16/sherpa/server"
 )
 
 //go:embed static/*

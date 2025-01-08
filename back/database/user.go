@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Olyxz16/go-vue-template/database/utils"
-	"github.com/Olyxz16/go-vue-template/logging"
+	"github.com/Olyxz16/sherpa/database/utils"
+	"github.com/Olyxz16/sherpa/logging"
 )
 
 

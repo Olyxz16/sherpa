@@ -5,8 +5,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-	"github.com/Olyxz16/go-vue-template/database"
-	"github.com/Olyxz16/go-vue-template/handlers/github"
+	"github.com/Olyxz16/sherpa/database"
+	"github.com/Olyxz16/sherpa/handlers/github"
 )
 
 

@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/Olyxz16/go-vue-template/database/utils"
+	"github.com/Olyxz16/sherpa/database/utils"
 )
 
 func TestFetchSingleUserSingleFileData(t *testing.T) {
