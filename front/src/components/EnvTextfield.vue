@@ -5,14 +5,11 @@ import { useWorkstationStore } from '@/stores/workstationStore'
 
 const placeholder = "HOST=\nPORT=";
 
-const wsstore = useWorkstationStore();
-const updateStore = (payload : string | number) => {
-  wsstore.updateFileContent(payload)
-}
+const { updateFileContent, saveCurrentFile } = useWorkstationStore();
 </script>
 
 <template>
-    <Textarea class="textarea" @update:modelValue="updateStore" :placeholder="placeholder"/>
+    <Textarea class="textarea" @keydown.enter.shift.exact.prevent="saveCurrentFile" @keydown.s.ctrl.exact.prevent="saveCurrentFile" @update:modelValue="updateFileContent" :placeholder="placeholder"/>
 </template>
 
 <style scoped>
