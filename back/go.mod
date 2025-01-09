@@ -1,4 +1,4 @@
-module github.com/Olyxz16/go-vue-template
+module github.com/Olyxz16/sherpa
 
 go 1.21.4
 

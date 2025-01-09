@@ -8,8 +8,7 @@ import (
 	"io"
 )
 
-
-func EncryptFile(key, content string) (string, string, error) {
+func EncryptFile(key []byte, content string) (b64content, b64nonce string, err error) {
     block, err := aes.NewCipher([]byte(key))
     if err != nil {
         return "", "", err
@@ -31,15 +30,13 @@ func EncryptFile(key, content string) (string, string, error) {
     return encodedText, encodedNonce, nil
 }
 
-func DecryptFile(key, encodedNonce, encodedContent string) (string, error) {
-    content, err := base64.StdEncoding.DecodeString(encodedContent)
+func DecryptFile(key []byte, b64nonce, b64content string) (content string, err error) {
+    encryptedContent, err := base64.StdEncoding.DecodeString(b64content)
     if err != nil {
         return  "", err
     }
-    nonce, err := base64.StdEncoding.DecodeString(encodedNonce)
-    if err != nil {
-        return  "", err
-    }
+
+    nonce, err := base64.StdEncoding.DecodeString(b64nonce)
 
     block, err := aes.NewCipher([]byte(key))
     if err != nil {
@@ -51,10 +48,10 @@ func DecryptFile(key, encodedNonce, encodedContent string) (string, error) {
         return "", err
     }
 
-    decodedContentBytes, err := aesgcm.Open(nil, nonce, content, nil)
+    contentBytes, err := aesgcm.Open(nil, nonce, encryptedContent, nil)
     if err != nil {
         return "", err
     }
-    decodedContent := string(decodedContentBytes)
-    return decodedContent, nil
+    content = string(contentBytes)
+    return content, nil
 }

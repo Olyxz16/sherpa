@@ -11,12 +11,9 @@ const options : Option[] = [
 const defaultValue=".env";
 const searchPlaceholder="Search file";
 
-const store = useWorkstationStore();
-function updateCurrentFile(name: string) {
-  store.setCurrentFile(name);
-}
+const { setCurrentFile } = useWorkstationStore();
 </script>
 
 <template>
-  <ComboBox @select="updateCurrentFile" :options="options" :default-value="defaultValue" :search-placeholder="searchPlaceholder" />
+  <ComboBox @select="setCurrentFile" :options="options" :default-value="defaultValue" :search-placeholder="searchPlaceholder" />
 </template>

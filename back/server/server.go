@@ -12,7 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/Olyxz16/go-vue-template/database"
+	"github.com/Olyxz16/sherpa/database"
 )
 
 var (

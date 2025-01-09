@@ -1,11 +1,12 @@
 package database
 
 import (
+	"encoding/base64"
 	"fmt"
-    "net/http"
+	"net/http"
 
-    "github.com/Olyxz16/go-vue-template/database/utils"
-	"github.com/Olyxz16/go-vue-template/logging"
+	"github.com/Olyxz16/sherpa/database/utils"
+	"github.com/Olyxz16/sherpa/logging"
 )
 
 
@@ -14,37 +15,54 @@ type UserAuth struct {
     Cookie              *http.Cookie
     EncodedMasterkey    string
     Salt                string
+    B64filekey             string
+}
+
+
+func getUserFromCookie(cookie *http.Cookie) (*UserAuth, error) {
+    db := dbInstance.db
+    
+    q := `SELECT uid, encodedMasterkey, salt, b64filekey FROM UserAuth
+            WHERE cookie=$1`
+
+    cookieStr, err := utils.MarshalCookie(cookie)
+    if err != nil {
+        return nil, err
+    }
+
+    row := db.QueryRow(q, cookieStr)
+
+    var userAuth UserAuth
+    if err := row.Scan(&userAuth.Uid, &userAuth.EncodedMasterkey, &userAuth.Salt, &userAuth.B64filekey) ; err != nil {
+        return nil, err
+    }
+    userAuth.Cookie = cookie
+
+    return &userAuth, nil
 }
 
 
 func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
     db := dbInstance.db
-    q := `SELECT uid, cookie, encodedMasterkey FROM UserAuth
+    q := `SELECT uid, cookie, encodedMasterkey, b64filekey FROM UserAuth
             JOIN PlatformUserAuth ON uid = userId
             WHERE platformId=$1`
 
-    rows, err := db.Query(q, user.PlatformId)
-    if err != nil {
-        logging.ErrLog(fmt.Sprintf("GetUserFromPlatformId : %v", err))
+    row := db.QueryRow(q, user.PlatformId)
+
+    var result UserAuth
+    var cookieStr string
+    if err := row.Scan(&result.Uid, &cookieStr, &result.EncodedMasterkey, &result.B64filekey) ; err != nil {
         return nil, err
     }
-    defer rows.Close()
 
-    var result *UserAuth
-    if rows.Next() {
-        var uid int
-        var cookieStr string
-        var cookie *http.Cookie
-        var encodedMasterkey string
-        if err := rows.Scan(&uid, &cookieStr, &encodedMasterkey) ; err != nil {
-            return nil, err
-        }
-        if cookie, err = utils.UnmarshalCookie(cookieStr) ; err != nil {
-            return nil, err    
-        }
-        result = &UserAuth{ Uid: uid, Cookie: cookie, EncodedMasterkey: encodedMasterkey }
+    if cookie, err := utils.UnmarshalCookie(cookieStr) ; err == nil {
+        result.Cookie = cookie
+    } else {
+        return nil, err
     }
-    return result, nil
+
+    return &result, nil
 }
 
 // TODO Handle cookie collision
@@ -79,31 +97,27 @@ func GetUserOrCreateFromAuth(platformUser PlatformUserAuth) (*UserAuth, bool, er
     if err != nil {
         return nil, false, err
     }
-    rows, err := tx.Query(q, cookieStr)
-    if err != nil {
-        logging.ErrLog(fmt.Sprintf("GetUserOrCreateFromAuth : %v", err))
-        return nil, false, err
-    }
-    defer rows.Close()
+    row := tx.QueryRow(q, cookieStr)
 
     var uid int
-    if rows.Next() {
-        if err := rows.Scan(&uid) ; err != nil {
-            return nil, false, err
-        }
+    if err := row.Scan(&uid) ; err != nil {
+        return nil, false, err
     }
 
-    err = tx.Commit()
+    if err := tx.Commit() ; err != nil {
+        return nil, false, err 
+    }
     user := &UserAuth{ Uid: uid, Cookie: cookie }
-    return user, true, err
+    return user, true, nil
 }
 
 func SetUserMasterkey(cookie *http.Cookie, masterkey string) (error) {
     db := dbInstance.db
     q := `UPDATE UserAuth
         SET encodedMasterkey=$1,
-        salt=$2
-        WHERE cookie=$3`
+        salt=$2,
+        b64filekey=$3
+        WHERE cookie=$4`
 
     tx, err := db.Begin()
     if err != nil {
@@ -116,20 +130,29 @@ func SetUserMasterkey(cookie *http.Cookie, masterkey string) (error) {
         logging.ErrLog(fmt.Sprintf("SetUserMasterkey : %v", err))
         return err
     }
-    encodedMasterkey, b64Salt, _, err := utils.HashFromMasterkey(masterkey)
+    encodedMasterkey, b64Salt, b64Hash, err := utils.HashFromMasterkey(masterkey)
     if err != nil {
         logging.ErrLog(fmt.Sprintf("SetUserMasterkey : %v", err))
         return err
     }
-    rows, err := tx.Query(q, encodedMasterkey, b64Salt, cookieStr)
+    hash, err := base64.StdEncoding.DecodeString(b64Hash)
     if err != nil {
-        logging.ErrLog(fmt.Sprintf("SetUserMasterkey : %v", err))
         return err
     }
-    defer rows.Close()
+    _, _, b64Filekey, err := utils.HashFromMasterkey(string(hash))
+    if err != nil {
+        return err
+    }
 
-    err = tx.Commit()
-    return err
+    if _, err := tx.Exec(q, encodedMasterkey, b64Salt, b64Filekey, cookieStr) ; err != nil {
+        logging.ErrLog(fmt.Sprintf("SetUserMasterkey : %v", err))
+        return err
+    }
+
+    if err := tx.Commit() ; err != nil {
+        return err
+    }
+    return nil
 }
 
 
@@ -144,7 +167,8 @@ func migrateUserAuth() {
         uid                 SERIAL PRIMARY KEY,
         cookie              TEXT UNIQUE DEFAULT '',
         encodedMasterkey    TEXT        DEFAULT '',
-        salt                TEXT        DEFAULT ''
+        salt                TEXT        DEFAULT '',
+        b64filekey          TEXT        DEFAULT ''
     )`
     _, err := db.Exec(q)
     if err != nil {
@@ -161,15 +185,12 @@ func isUserMigrated() (bool, error) {
     schemaname = 'public' AND
     tablename  = 'userauth'
     );`
-    rows, err := db.Query(q)
-    if err != nil {
-        return false, err
-    }
-    defer rows.Close()
+    row := db.QueryRow(q)
 
     var result bool
-    rows.Next()
-    rows.Scan(&result)
+    if err := row.Scan(&result) ; err != nil {
+        panic(err)
+    }
 
     return result, nil
 }

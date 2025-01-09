@@ -51,7 +51,7 @@ func (s *service) Health() bool {
 
 	err := s.db.PingContext(ctx)
 	if err != nil {
-		log.Fatalf(fmt.Sprintf("db down: %v", err))
+		log.Fatal(fmt.Sprintf("db down: %v", err))
 	}
 
     return err == nil

@@ -8,9 +8,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
-	"github.com/Olyxz16/go-vue-template/handlers"
-	"github.com/Olyxz16/go-vue-template/handlers/user"
-	"github.com/Olyxz16/go-vue-template/handlers/github"
+	"github.com/Olyxz16/sherpa/handlers"
+	"github.com/Olyxz16/sherpa/handlers/user"
+	"github.com/Olyxz16/sherpa/handlers/github"
 )
 
 func RegisterRoutes() http.Handler {
@@ -30,6 +30,8 @@ func RegisterRoutes() http.Handler {
     e.GET("/auth/github/callback", github.AuthGithubLogin)
 
     e.GET("/user", user.FetchUser)
+    e.GET("/file", user.FetchUserRepoFile)
+    e.POST("/file", user.SaveUserRepoFile)
 
     /* Health checks */
     e.GET("/health", handlers.Health)

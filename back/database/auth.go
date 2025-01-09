@@ -3,9 +3,9 @@ package database
 import (
 	"fmt"
 	"net/http"
-    
-    "github.com/Olyxz16/go-vue-template/database/utils"
-	"github.com/Olyxz16/go-vue-template/logging"
+
+	"github.com/Olyxz16/sherpa/database/utils"
+	"github.com/Olyxz16/sherpa/logging"
 )
 
 type PlatformUserAuth struct {
@@ -60,8 +60,10 @@ func AuthenticateUser(auth PlatformUserAuth) (*UserAuth, bool, error) {
         return nil, false, err
     }
 
-    err = tx.Commit()
-    return user, true, err
+    if err = tx.Commit() ; err != nil {
+        return nil, false, err
+    }
+    return user, true, nil
 }
 
 // TODO rows protection when rows length 0
@@ -75,16 +77,10 @@ func TokenFromCookie(cookie *http.Cookie, source string) (string, error) {
     if err != nil {
         return "", err
     }
-    rows, err := db.Query(q, cookieStr, source)
-    if err != nil {
-        return "", err
-    }
-    defer rows.Close()
+    row := db.QueryRow(q, cookieStr, source)
 
     var access_token string
-    rows.Next()
-    err = rows.Scan(&access_token)
-    if err != nil {
+    if err = row.Scan(&access_token) ; err != nil {
         return "", err
     }
 
@@ -121,8 +117,7 @@ func migrateGithubAuth() {
     rt_expires_in   FLOAT,
     PRIMARY KEY (userId, platformId)
     )`
-    _, err = db.Exec(q)
-    if err != nil {
+    if _, err = db.Exec(q) ; err != nil {
         panic(err)
     }
 }

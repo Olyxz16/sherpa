@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-    "github.com/Olyxz16/go-vue-template/database/utils"
+    "github.com/Olyxz16/sherpa/database/utils"
 )
 
 
@@ -98,15 +98,9 @@ func userIdFromPlatformId(platform PlatformUserAuth) (int, bool, error) {
     db := dbInstance.db
     q := `SELECT userId FROM PlatformUserAuth
         WHERE platformId=$1`
-    rows, err := db.Query(q, platform.PlatformId)
-    if err != nil {
-        return -1, false, err
-    }
-    if !rows.Next() {
-        return -1, false, nil
-    }
+    row := db.QueryRow(q, platform.PlatformId)
     var userId int
-    err = rows.Scan(&userId) 
+    err := row.Scan(&userId) 
     if err != nil {
         return -1, false, err
     }

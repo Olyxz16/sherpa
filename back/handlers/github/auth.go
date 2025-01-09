@@ -9,8 +9,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 
-    "github.com/Olyxz16/go-vue-template/logging"
-	"github.com/Olyxz16/go-vue-template/database"
+    "github.com/Olyxz16/sherpa/logging"
+	"github.com/Olyxz16/sherpa/database"
 )
 
 

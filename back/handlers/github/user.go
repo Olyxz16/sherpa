@@ -7,7 +7,7 @@ import (
 	"strings"
 	"encoding/json"
 
-    "github.com/Olyxz16/go-vue-template/logging"
+    "github.com/Olyxz16/sherpa/logging"
 )
 
 
