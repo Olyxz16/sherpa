@@ -18,16 +18,13 @@ func TestFetchSingleUserSingleFileData(t *testing.T) {
         t.Fatalf("Error mocking file data : %v", err)
     }
     
-    err = clean()
-    if err != nil {
+    if err = clean() ; err != nil {
         t.Fatalf("Error cleaning database : %v", err)
     }
-    err = insertUser(*user)
-    if err != nil {
+    if err = insertUser(*user) ; err != nil {
         t.Fatalf("Error inserting user : %v", err)
     }
-    err = insertFileData(*fileData)
-    if err != nil {
+    if err = insertFileData(*fileData) ; err != nil {
         t.Fatalf("Error inserting fileData : %v", err)
     }
     
@@ -68,16 +65,13 @@ func TestFetchSingleUserMultipleFileData(t *testing.T) {
         otherData = append(otherData, *fd)
     }
     
-    err = clean()
-    if err != nil {
+    if err := clean() ; err != nil {
         t.Fatalf("Error cleaning database : %v", err)
     }
-    err = insertUser(*user)
-    if err != nil {
+    if err := insertUser(*user) ; err != nil {
         t.Fatalf("Error inserting user : %v", err)
     }
-    err = insertFileData(*fileData)
-    if err != nil {
+    if err := insertFileData(*fileData) ; err != nil {
         t.Fatalf("Error inserting fileData : %v", err)
     }
     
@@ -107,6 +101,9 @@ func mockFileDataFromUser(userAuth UserAuth) (string, *FileData, error) {
     }
     
     filekey, err := base64.StdEncoding.DecodeString(userAuth.B64filekey)
+    if err != nil {
+        return "", nil, err
+    }
     b64content, b64nonce, err := utils.EncryptFile(filekey, content)
     if err != nil {
         return "", nil, err
@@ -128,6 +125,8 @@ func insertFileData(file FileData) (error) {
         (ownerId, source, reponame, filename, b64content, b64nonce)
         VALUES ($1, $2, $3, $4, $5, $6)`
 
-    _, err := db.Exec(q, file.OwnerId, file.Source, file.RepoName, file.FileName, file.B64Content, file.B64Nonce)
-    return err
+    if _, err := db.Exec(q, file.OwnerId, file.Source, file.RepoName, file.FileName, file.B64Content, file.B64Nonce) ; err != nil {
+        return err
+    }
+    return nil
 }

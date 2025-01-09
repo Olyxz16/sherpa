@@ -60,8 +60,7 @@ func AuthenticateUser(auth PlatformUserAuth) (*UserAuth, bool, error) {
         return nil, false, err
     }
 
-    err = tx.Commit()
-    if err != nil {
+    if err = tx.Commit() ; err != nil {
         return nil, false, err
     }
     return user, true, nil
@@ -81,8 +80,7 @@ func TokenFromCookie(cookie *http.Cookie, source string) (string, error) {
     row := db.QueryRow(q, cookieStr, source)
 
     var access_token string
-    err = row.Scan(&access_token)
-    if err != nil {
+    if err = row.Scan(&access_token) ; err != nil {
         return "", err
     }
 
@@ -119,8 +117,7 @@ func migrateGithubAuth() {
     rt_expires_in   FLOAT,
     PRIMARY KEY (userId, platformId)
     )`
-    _, err = db.Exec(q)
-    if err != nil {
+    if _, err = db.Exec(q) ; err != nil {
         panic(err)
     }
 }

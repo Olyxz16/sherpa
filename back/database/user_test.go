@@ -33,16 +33,13 @@ func TestGetUserFromPlatformID(t *testing.T) {
         Uid: uid,
         Cookie: cookie,
     }
-    err = clean()
-    if err != nil {
+    if err = clean() ; err != nil {
         t.Fatalf("Failed cleaning database : %v", err)
     }
-    err = insertUser(inputUserAuth)
-    if err != nil {
+    if err = insertUser(inputUserAuth) ; err != nil {
         t.Fatalf("Failed inserting userAuth : %v", err)
     }
-    err = insertPlatform(platformAuth)
-    if err != nil {
+    if err = insertPlatform(platformAuth) ; err != nil {
         t.Fatalf("Failed inserting platformAuth : %v", err)
     }
 
@@ -71,12 +68,10 @@ func GetNonExistentUser(t *testing.T) {
         Expires_in: 10000,
         Refresh_expires_in: 10000,
     }
-    err := clean()
-    if err != nil {
+    if err := clean() ; err != nil {
         t.Fatalf("Failed cleaning database : %v", err)
     }
-    err = insertPlatform(platformAuth)
-    if err != nil {
+    if err := insertPlatform(platformAuth) ; err != nil {
         t.Fatalf("Failed inserting platformAuth : %v", err)
     }
 
@@ -110,13 +105,12 @@ func TestCreateUser(t *testing.T) {
         Expires_in: 10000,
         Refresh_expires_in: 10000,
     }
-    err := clean()
-    if err != nil {
+
+    if err := clean() ; err != nil {
         t.Fatalf("Failed cleaning database : %v", err)
     }
 
     _, isNew, err := GetUserOrCreateFromAuth(platformAuth)
-
     if err != nil {
         t.Fatalf("Failed GetUserOrCreateFromAuth : %v", err)
     }
@@ -173,13 +167,14 @@ func mockUserIdFromPlatform(platform PlatformUserAuth) (*UserAuth, error) {
 func clean() error {
     db := dbInstance.db
     q := `TRUNCATE TABLE UserAuth CASCADE`
-    _, err := db.Exec(q)
-    if err != nil {
+    if _, err := db.Exec(q) ; err != nil {
         return err
     }
     q = `TRUNCATE TABLE PlatformUserAuth CASCADE`
-    _, err = db.Exec(q)
-    return err
+    if _, err := db.Exec(q) ; err != nil {
+        return err
+    }
+    return nil
 }
 func insertPlatform(auth PlatformUserAuth) error {
     db := dbInstance.db
@@ -187,7 +182,10 @@ func insertPlatform(auth PlatformUserAuth) error {
         (userId, platformId, source, access_token, expires_in, refresh_token, rt_expires_in)
         VALUES ($1, $2, $3, $4, $5, $6, $7)`
     _, err := db.Exec(q, auth.UserId, auth.PlatformId, auth.Source, auth.Access_token, auth.Expires_in, auth.Refresh_token, auth.Refresh_expires_in)
-    return err
+    if err != nil {
+        return err
+    }
+    return nil
 }
 func insertUser(user UserAuth) error {
     db := dbInstance.db
@@ -199,6 +197,8 @@ func insertUser(user UserAuth) error {
     if err != nil {
         return err
     }
-    _, err = db.Exec(q, user.Uid, cookieStr)
-    return err
+    if _, err = db.Exec(q, user.Uid, cookieStr) ; err != nil {
+        return err
+    }
+    return nil
 }

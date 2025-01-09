@@ -63,6 +63,9 @@ func SaveFile(cookie *http.Cookie, source, repoName, fileName, content string) e
     }
     
     filekey, err := base64.StdEncoding.DecodeString(user.B64filekey)
+    if err != nil {
+        return err
+    }
     b64content, b64nonce, err := utils.EncryptFile(filekey, content)
     if err != nil {
         return err
@@ -81,13 +84,11 @@ func SaveFile(cookie *http.Cookie, source, repoName, fileName, content string) e
     }
     defer tx.Rollback()
 
-    _, err = tx.Exec(q, user.Uid, source, repoName, fileName, b64content, b64nonce)
-    if err != nil {
+    if _, err = tx.Exec(q, user.Uid, source, repoName, fileName, b64content, b64nonce) ; err != nil {
         return err
     }
 
-    err = tx.Commit()
-    if err != nil {
+    if err = tx.Commit() ; err != nil {
         return err
     }
     return nil
@@ -120,8 +121,7 @@ func migrateFileData() {
         b64Nonce            TEXT,
         PRIMARY KEY(ownerId, source, repoName, fileName)
     )`
-    _, err = db.Exec(q)
-    if err != nil {
+    if _, err = db.Exec(q) ; err != nil {
         panic(err)
     }
 }

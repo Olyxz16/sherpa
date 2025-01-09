@@ -2,7 +2,6 @@ package database
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -31,18 +30,10 @@ func getUserFromCookie(cookie *http.Cookie) (*UserAuth, error) {
         return nil, err
     }
 
-    rows, err := db.Query(q, cookieStr)
-    if err != nil {
-        return nil, err
-    }
-    defer rows.Close()
+    row := db.QueryRow(q, cookieStr)
 
     var userAuth UserAuth
-    if !rows.Next() {
-        return nil, errors.New("Missing data")
-    }
-    err = rows.Scan(&userAuth.Uid, &userAuth.EncodedMasterkey, &userAuth.Salt, &userAuth.B64filekey)
-    if err != nil {
+    if err := row.Scan(&userAuth.Uid, &userAuth.EncodedMasterkey, &userAuth.Salt, &userAuth.B64filekey) ; err != nil {
         return nil, err
     }
     userAuth.Cookie = cookie
@@ -57,29 +48,21 @@ func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
             JOIN PlatformUserAuth ON uid = userId
             WHERE platformId=$1`
 
-    rows, err := db.Query(q, user.PlatformId)
-    if err != nil {
-        logging.ErrLog(fmt.Sprintf("GetUserFromPlatformId : %v", err))
+    row := db.QueryRow(q, user.PlatformId)
+
+    var result UserAuth
+    var cookieStr string
+    if err := row.Scan(&result.Uid, &cookieStr, &result.EncodedMasterkey, &result.B64filekey) ; err != nil {
         return nil, err
     }
-    defer rows.Close()
 
-    var result *UserAuth
-    if rows.Next() {
-        var uid int
-        var cookieStr string
-        var cookie *http.Cookie
-        var encodedMasterkey string
-        var filekey string
-        if err := rows.Scan(&uid, &cookieStr, &encodedMasterkey, &filekey) ; err != nil {
-            return nil, err
-        }
-        if cookie, err = utils.UnmarshalCookie(cookieStr) ; err != nil {
-            return nil, err    
-        }
-        result = &UserAuth{ Uid: uid, Cookie: cookie, EncodedMasterkey: encodedMasterkey, B64filekey: filekey }
+    if cookie, err := utils.UnmarshalCookie(cookieStr) ; err == nil {
+        result.Cookie = cookie
+    } else {
+        return nil, err
     }
-    return result, nil
+
+    return &result, nil
 }
 
 // TODO Handle cookie collision
@@ -114,23 +97,18 @@ func GetUserOrCreateFromAuth(platformUser PlatformUserAuth) (*UserAuth, bool, er
     if err != nil {
         return nil, false, err
     }
-    rows, err := tx.Query(q, cookieStr)
-    if err != nil {
-        logging.ErrLog(fmt.Sprintf("GetUserOrCreateFromAuth : %v", err))
-        return nil, false, err
-    }
-    defer rows.Close()
+    row := tx.QueryRow(q, cookieStr)
 
     var uid int
-    if rows.Next() {
-        if err := rows.Scan(&uid) ; err != nil {
-            return nil, false, err
-        }
+    if err := row.Scan(&uid) ; err != nil {
+        return nil, false, err
     }
 
-    err = tx.Commit()
+    if err := tx.Commit() ; err != nil {
+        return nil, false, err 
+    }
     user := &UserAuth{ Uid: uid, Cookie: cookie }
-    return user, true, err
+    return user, true, nil
 }
 
 func SetUserMasterkey(cookie *http.Cookie, masterkey string) (error) {
@@ -166,14 +144,15 @@ func SetUserMasterkey(cookie *http.Cookie, masterkey string) (error) {
         return err
     }
 
-    _, err = tx.Exec(q, encodedMasterkey, b64Salt, b64Filekey, cookieStr)
-    if err != nil {
+    if _, err := tx.Exec(q, encodedMasterkey, b64Salt, b64Filekey, cookieStr) ; err != nil {
         logging.ErrLog(fmt.Sprintf("SetUserMasterkey : %v", err))
         return err
     }
 
-    err = tx.Commit()
-    return err
+    if err := tx.Commit() ; err != nil {
+        return err
+    }
+    return nil
 }
 
 
@@ -209,8 +188,7 @@ func isUserMigrated() (bool, error) {
     row := db.QueryRow(q)
 
     var result bool
-    err := row.Scan(&result)
-    if err != nil {
+    if err := row.Scan(&result) ; err != nil {
         panic(err)
     }
 
