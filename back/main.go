@@ -1,15 +1,16 @@
 package main
 
 import (
-    "io/fs"
 	"context"
+	"embed"
+	"flag"
 	"fmt"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-    "embed"
 
 	"github.com/Olyxz16/sherpa/server"
 )
@@ -19,6 +20,12 @@ var f embed.FS
 
 func main() {
     
+    healthCheckFlag := flag.Bool("healthcheck", false, "Performs a health check on the running service")
+    flag.Parse()
+    if *healthCheckFlag {
+        checkHealth()
+    }
+
     f, err := fs.Sub(f, "static")
     if err != nil {
         panic("Static folder static/ missing !") 
@@ -60,4 +67,14 @@ func main() {
     defer os.Exit(0)
     return
 
+}
+
+func checkHealth() {
+    port := os.Getenv("PORT")
+    url := fmt.Sprintf("http://localhost:%s/health", port)
+    _, err := http.Get(url)
+    if err != nil {
+        os.Exit(1)
+    }
+    os.Exit(0)
 }
