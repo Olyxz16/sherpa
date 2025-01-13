@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils'
 import { ComboBox } from '@/components/ui/combobox'
-import { CommandInput } from '@/components/ui/command';
 import type { Option } from '@/types/ComboBoxTypes'
 import { useWorkstationStore } from '@/stores/workstationStore'
-import type { PropType } from 'vue'
-import { useForwardProps } from 'radix-vue'
+import { ref } from 'vue'
 
 const options : Option[] = [
     { value: '.env', label: '.env' },
@@ -15,6 +13,22 @@ const defaultValue=".env";
 const searchPlaceholder="Search file";
 
 const { setCurrentFile } = useWorkstationStore();
+
+const value = ref("");
+function addFile() {
+  const v = {
+    value: value.value,
+    label: value.value
+  }
+  if(options.includes(v)) {
+     return;
+  }
+  options.push({
+    value: value.value,
+    label: value.value
+  });
+  value.value = "";
+}
 </script>
 
 <template>
@@ -23,7 +37,12 @@ const { setCurrentFile } = useWorkstationStore();
       <p> No file found </p>
     </template>
     <template #end-command>
-      <CommandInput class="h-9" :placeholder="searchPlaceholder" />
+      <input type="text"
+        v-model="value"
+        placeholder="Add file"
+        @change="addFile"
+        :class="cn('flex h-11 px-2 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50', $props)"
+      />
     </template>
   </ComboBox>
 </template>

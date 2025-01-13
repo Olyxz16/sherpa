@@ -2,7 +2,6 @@
 An environment storing and sharing tool
 
 ### DOING
-- create file adding logic #front
 
 ### TODO 
 - data validation
@@ -19,6 +18,7 @@ An environment storing and sharing tool
 - remove user duplication prevention in sql request since already tested before ? @AuthenticateUser #back
 
 ### DONE
+- create file adding logic #front
 - Fetch data from file on selection #front
 - Save data #back
 - Authentication
