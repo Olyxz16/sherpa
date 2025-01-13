@@ -2,9 +2,9 @@
 An environment storing and sharing tool
 
 ### DOING
+- create file adding logic #front
 
 ### TODO 
-- create file adding logic #front
 - data validation
 - handle front end error display
 - handle front end succes display

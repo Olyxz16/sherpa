@@ -33,5 +33,9 @@ function updateCurrentRepo(name: string) {
 </script>
 
 <template>
-  <ComboBox @select="updateCurrentRepo" :options="options" :placeholder="placeholder" :search-placeholder="searchPlaceholder" />
+  <ComboBox @select="updateCurrentRepo" :options="options" :placeholder="placeholder" :search-placeholder="searchPlaceholder">
+    <template #empty-msg>
+      <p> No repository found. </p>
+    </template>
+  </ComboBox>
 </template>

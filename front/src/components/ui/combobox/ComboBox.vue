@@ -56,7 +56,9 @@ const value = ref(props.defaultValue)
     <PopoverContent class="w-[200px] p-0">
       <Command>
       <CommandInput class="h-9" :placeholder="searchPlaceholder" />
-        <CommandEmpty>No framework found.</CommandEmpty>
+        <CommandEmpty>
+          <slot name="empty-msg"> </slot>
+        </CommandEmpty>
         <CommandList>
           <CommandGroup>
             <CommandItem
@@ -82,6 +84,7 @@ const value = ref(props.defaultValue)
             </CommandItem>
           </CommandGroup>
         </CommandList>
+      <slot name="end-command"></slot>
       </Command>
     </PopoverContent>
   </Popover>
