@@ -10,6 +10,10 @@ import (
 )
 
 
+type masterkeyRequest struct {
+    Masterkey   string      `json:"masterkey"`
+}
+
 func FetchUser(c echo.Context) error {
     // handle data source
     source := "github.com"
@@ -33,22 +37,17 @@ func FetchUser(c echo.Context) error {
 }
 
 func SetUserMasterkey(c echo.Context) error {
-    var body map[string]interface{}
-    err := json.NewDecoder(c.Request().Body).Decode(&body)
+    var mkr masterkeyRequest
+    err := c.Bind(mkr)
     if err != nil {
-        return c.JSON(401, `{message: "Missing masterkey"}`)
-    }
-
-    masterkey, ok := body["masterkey"].(string)
-    if !ok {
-        return c.JSON(401, `{message: "Missing masterkey"}`)
+        return c.JSON(400, `{message: "Missing masterkey"}`)
     }
 
     cookie, err := c.Cookie("session")
     if err != nil {
         return c.JSON(401, `{message: "Missing cookie"}`)
     }
-    err = database.SetUserMasterkey(cookie, masterkey)      
+    err = database.SetUserMasterkey(cookie, mkr.Masterkey)      
     if err != nil {
         return c.JSON(500, `{message: "Error"}`)
     }

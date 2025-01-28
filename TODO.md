@@ -4,7 +4,6 @@ An environment storing and sharing tool
 ### DOING
 
 ### TODO 
-- data validation
 - handle front end error display
 - handle front end succes display
 - refactor getUserRepos #back
@@ -18,6 +17,7 @@ An environment storing and sharing tool
 - remove user duplication prevention in sql request since already tested before ? @AuthenticateUser #back
 
 ### DONE
+- data validation
 - create file adding logic #front
 - Fetch data from file on selection #front
 - Save data #back
