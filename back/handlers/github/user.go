@@ -12,7 +12,7 @@ import (
 
 
 type UserData struct {
-    PlatformID          int         `json:"userId"`
+    PlatformID          int         `json:"-"`
     Username            string      `json:"username"`
     AvatarUrl           string      `json:"avatarUrl"`
     RepoNames           []string    `json:"repositories"`

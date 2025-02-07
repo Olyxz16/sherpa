@@ -5,15 +5,14 @@ import { useCookies } from '@vueuse/integrations/useCookies'
 import fetchUser from '@/lib/fetchUser';
 
 export async function tryLoadUserData() {
-  const cookies = useCookies(["session"])
-  const session = cookies.get("session")
+  const cookies = useCookies(["session"]);
+  const session = cookies.get("session");
   if(session) {
-    const loaded = loadCache()
+    const loaded = loadCache();
     if(!loaded) {
-      try {
-        await fetchUser(session)
-      } catch(e) {
-        cookies.remove("session")
+      const fetched = await fetchUser(session);
+      if(!fetched) {
+        cookies.remove("session");
       }
     }
   }

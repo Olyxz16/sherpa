@@ -1,7 +1,7 @@
 import { useUserStore } from '@/stores/userStore'
 import type { UserData } from '@/types/UserData'
 
-export default async function fetchUser(cookie: string) {
+export default async function fetchUser(cookie: string) : Promise<boolean> {
   const userStore = useUserStore();
   try {
     const resp = await fetch("/user", {
@@ -10,10 +10,10 @@ export default async function fetchUser(cookie: string) {
         "Authorization": `Bearer ${cookie}`
       }
     });
-    const json = await resp.json() as string;
-    const data = JSON.parse(json) as UserData;
+    const data : UserData = await resp.json() as UserData;
     userStore.login(data.username, data.avatarUrl, data.repositories)
   } catch(e) {
-    throw new Error("Error fetching user data")
+    return false;
   }
+  return true;
 }
