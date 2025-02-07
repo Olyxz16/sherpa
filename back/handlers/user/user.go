@@ -2,8 +2,9 @@ package user
 
 import (
 	"encoding/json"
+	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/go-chi/render"
 
 	"github.com/Olyxz16/sherpa/database"
 	"github.com/Olyxz16/sherpa/handlers/github"
@@ -14,42 +15,49 @@ type masterkeyRequest struct {
     Masterkey   string      `json:"masterkey"`
 }
 
-func FetchUser(c echo.Context) error {
+func FetchUser(w http.ResponseWriter, r *http.Request) {
     // handle data source
     source := "github.com"
-    cookie, err :=  c.Cookie("session")
+    cookie, err :=  r.Cookie("session")
     if err != nil {
-        return c.JSON(401, `{message: "Missing cookie"}`)
+        w.WriteHeader(401)
+        render.JSON(w, r, map[string]string {"message": "Missing cookie"})
     }
     access_token, err := database.TokenFromCookie(cookie, source)
     if err != nil {
-        return c.JSON(401, "{message: Unauthorized}")
+        w.WriteHeader(401)
+        render.JSON(w, r, map[string]string {"message": "Unauthorized"})
     }
     userData, err := github.GetUserData(access_token) 
     if err != nil {
-        return c.JSON(500, "{message: Internal error}")
+        w.WriteHeader(500)
+        render.JSON(w, r, map[string]string {"message": "Internal error"})
     }
     json, err := json.Marshal(userData)
     if err != nil {
-        return c.JSON(500, "{message: Internal error}")
+        w.WriteHeader(500)
+        render.JSON(w, r, map[string]string {"message": "Internal error"})
     }
-    return c.JSON(200, string(json))
+    w.Write(json)
 }
 
-func SetUserMasterkey(c echo.Context) error {
+func SetUserMasterkey(w http.ResponseWriter, r *http.Request) {
     var mkr masterkeyRequest
-    err := c.Bind(mkr)
+    err := render.DecodeJSON(r.Body, &mkr)
     if err != nil {
-        return c.JSON(400, `{message: "Missing masterkey"}`)
+        w.WriteHeader(400)
+        render.JSON(w, r, map[string]string {"message": "Missing masterkey"})
     }
 
-    cookie, err := c.Cookie("session")
+    cookie, err := r.Cookie("session")
     if err != nil {
-        return c.JSON(401, `{message: "Missing cookie"}`)
+        w.WriteHeader(401)
+        render.JSON(w, r, map[string]string {"message": "Missing cookie"})
     }
     err = database.SetUserMasterkey(cookie, mkr.Masterkey)      
     if err != nil {
-        return c.JSON(500, `{message: "Error"}`)
+        w.WriteHeader(500)
+        render.JSON(w, r, map[string]string {"message": "Error"})
     }
-    return c.JSON(200, `{message: "OK"}`)
+    render.JSON(w, r, map[string]string {"message": "OK"})
 }

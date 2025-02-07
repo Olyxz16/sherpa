@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 
-func APIModeResponse(c echo.Context) error {
-    return c.HTML(200, "Api mode is active. Static pages are not rendered.") 
+func APIModeResponse(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("Api mode is active. Static pages are not rendered."))
 }

@@ -2,8 +2,9 @@ package user
 
 import (
 	"encoding/json"
+	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/go-chi/render"
 
 	"github.com/Olyxz16/sherpa/database"
 )
@@ -16,55 +17,64 @@ type saveFileRequest struct {
     Content     string      `json:"content"`
 }
 
-func SaveUserRepoFile(c echo.Context) error {
-    cookie, err := c.Cookie("session")
+func SaveUserRepoFile(w http.ResponseWriter, r *http.Request) {
+    cookie, err := r.Cookie("session")
     if err != nil {
-        return c.JSON(401, `{message: "Unauthorized"}`)
+        w.WriteHeader(401)
+        render.JSON(w, r, map[string]string {"message": "Unauthorized"})
     }
     
     var sfr saveFileRequest
-    err = c.Bind(&sfr)
+    err = render.DecodeJSON(r.Body, &sfr)
     if err != nil {
-        return c.JSON(500, `{message: "Bad request"}`)
+        w.WriteHeader(500)
+        render.JSON(w, r, map[string]string {"message": "Bad request"})
     }
     
     err = database.SaveFile(cookie, sfr.Source, sfr.RepoName, sfr.FileName, sfr.Content)
     if err != nil {
-        return c.JSON(500, `{message: "Missing data"}`)
+        w.WriteHeader(500)
+        render.JSON(w, r, map[string]string {"message": "Missing data"})
     }
-    return c.JSON(200, `{message: "OK"}`)
+    render.JSON(w, r, map[string]string {"message": "OK"})
 }
 
-func FetchUserRepoFile(c echo.Context) error {
-    cookie, err := c.Cookie("session")
+func FetchUserRepoFile(w http.ResponseWriter, r *http.Request) {
+    cookie, err := r.Cookie("session")
     if err != nil {
-        return c.JSON(401, `{message: "Unauthorized"}`)
+        w.WriteHeader(401)
+        render.JSON(w, r, map[string]string {"message": "Unauthorized"})
     }
-    source := c.QueryParam("source")
+    query := r.URL.Query()
+    source := query.Get("source")
     if source == "" {
-        return c.JSON(400, `{message: "Missing source"}`)
+        w.WriteHeader(400)
+        render.JSON(w, r, map[string]string {"message": "Missing source"})
     }
-    repoName := c.QueryParam("repo")
+    repoName := query.Get("repo")
     if repoName == "" {
-        return c.JSON(400, `{message: "Missing repository name"}`)
+        w.WriteHeader(400)
+        render.JSON(w, r, map[string]string {"message": "Missing repository name"})
     }
-    fileName := c.QueryParam("file")
+    fileName := query.Get("file")
     if fileName == "" {
-        return c.JSON(400, `{message: "Missing file name"}`)
+        w.WriteHeader(400)
+        render.JSON(w, r, map[string]string {"message": "Missing file name"})
     }
     
     content, err := database.FetchFileContent(cookie, source, repoName, fileName)
     if err != nil {
         // handle different errors
-        return c.JSON(500, `{message: "Missing data"}`)
+        w.WriteHeader(500)
+        render.JSON(w, r, map[string]string {"message": "Missing data"})
     }
 
     response := make(map[string]interface{})
     response["content"] = content
-    jsonBytes, err := json.Marshal(response)
+    json, err := json.Marshal(response)
     if err != nil {
-        return c.JSON(500, `{message: "Error fetch file"}`)
+        w.WriteHeader(500)
+        render.JSON(w, r, map[string]string {"message": "Error fetch file"})
     }
-    json := string(jsonBytes)
-    return c.JSON(200, json)
+    w.Write(json)
 }

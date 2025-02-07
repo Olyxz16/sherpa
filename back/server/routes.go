@@ -1,53 +1,56 @@
 package server
 
 import (
-    "io/fs"
+	"io/fs"
 	"log/slog"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/Olyxz16/sherpa/handlers"
-	"github.com/Olyxz16/sherpa/handlers/user"
 	"github.com/Olyxz16/sherpa/handlers/github"
+	"github.com/Olyxz16/sherpa/handlers/user"
 )
 
 func RegisterRoutes() http.Handler {
-	e := echo.New()
-	e.Use(middleware.Recover())
-    e.Use(middleware.Logger())
-    e.StaticFS("/", staticDir)
+    r := chi.NewRouter()
+    r.Use(middleware.Recoverer)
+    r.Use(middleware.Logger)
+
+    staticFS := http.FileServer(http.FS(staticDir))
+    r.Handle("/*", staticFS)
     
     /* Static pages */
-    e.GET("/", staticHandler)
-    e.GET("/login", staticHandler)
-    e.GET("/welcome", staticHandler)
+    r.Get("/", staticHandler)
+    r.Get("/login", staticHandler)
+    r.Get("/welcome", staticHandler)
     
     /* Api endpoints */
     /* Auth */
-    e.POST("/auth/masterkey", user.SetUserMasterkey)
-    e.GET("/auth/github/callback", github.AuthGithubLogin)
+    r.Route("/auth", func(r chi.Router) {
+        r.Post("/masterkey", user.SetUserMasterkey)
+        r.Get("/github/callback", github.AuthGithubLogin)
+    })
 
-    e.GET("/user", user.FetchUser)
-    e.GET("/file", user.FetchUserRepoFile)
-    e.POST("/file", user.SaveUserRepoFile)
+    r.Get("/user", user.FetchUser)
+    r.Get("/file", user.FetchUserRepoFile)
+    r.Post("/file", user.SaveUserRepoFile)
 
     /* Health checks */
-    e.GET("/health", handlers.Health)
+    r.Get("/health", handlers.Health)
 
-	return e
+	return r
 }
 
-func staticHandler(c echo.Context) error {
+func staticHandler(w http.ResponseWriter, r *http.Request) {
     content, err := fs.ReadFile(staticDir, "index.html")
     if err != nil {
-        return err
+        return
     }
-    err = c.HTMLBlob(200, content)
+    _, err = w.Write(content)
     if err != nil {
         slog.Warn(err.Error())
-        return err
+        return
     }
-    return nil
 }

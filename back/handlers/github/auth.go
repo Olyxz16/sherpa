@@ -7,42 +7,40 @@ import (
 	"os"
 	"strings"
 
-	"github.com/labstack/echo/v4"
-
-    "github.com/Olyxz16/sherpa/logging"
 	"github.com/Olyxz16/sherpa/database"
+	"github.com/Olyxz16/sherpa/logging"
 )
 
 
-func AuthGithubLogin(c echo.Context) error {
-    code := c.QueryParam("code")
+func AuthGithubLogin(w http.ResponseWriter, r *http.Request) {
+    code := r.URL.Query().Get("code")
     if code == "" {
-        return c.Redirect(302, "/auth_error")
+        http.Redirect(w, r, "/auth_error", 302)
     }
 
     platformAuth, err := exchangeCode(code)
     if err != nil {
-        return c.Redirect(302, "/auth_error")
+        http.Redirect(w, r, "/auth_error", 302)
     }
 
-    data := &UserData{}
-    err = getUserName(platformAuth.Access_token, data)
+    data := UserData{}
+    err = getUserName(platformAuth.Access_token, &data)
     if err != nil {
-        return c.Redirect(302, "/auth_error")
+        http.Redirect(w, r, "/auth_error", 302)
     }
     
     platformAuth.PlatformId = data.PlatformID
     
     userAuth, isNew, err := database.AuthenticateUser(*platformAuth)
     if err != nil {
-        return c.Redirect(302, "/auth_error")
+        http.Redirect(w, r, "/auth_error", 302)
     }
-    
-    http.SetCookie(c.Response(), userAuth.Cookie)
+
+    http.SetCookie(w, userAuth.Cookie)
     if isNew {
-        return c.Redirect(302, "/welcome")
+        http.Redirect(w, r, "/welcome", 302)
     }
-    return c.Redirect(302, "/")
+    http.Redirect(w, r, "/", 302)
 }
 
 func exchangeCode(code string) (*database.PlatformUserAuth, error) {
