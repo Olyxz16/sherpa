@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"embed"
-	"flag"
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -20,12 +19,6 @@ var f embed.FS
 
 func main() {
     
-    healthCheckFlag := flag.Bool("healthcheck", false, "Performs a health check on the running service")
-    flag.Parse()
-    if *healthCheckFlag {
-        checkHealth()
-    }
-
     f, err := fs.Sub(f, "static")
     if err != nil {
         panic("Static folder static/ missing !") 
@@ -59,22 +52,9 @@ func main() {
     err = server.Shutdown(gracefulCtx)
     if err != nil {
         slog.Error(fmt.Sprintf("Shutdown error : %v", err))
-        defer os.Exit(1)
-        return
+        os.Exit(1)
     }
     slog.Info("Gracefully stopped")
 
-    defer os.Exit(0)
-    return
-
-}
-
-func checkHealth() {
-    port := os.Getenv("PORT")
-    url := fmt.Sprintf("http://localhost:%s/health", port)
-    _, err := http.Get(url)
-    if err != nil {
-        os.Exit(1)
-    }
     os.Exit(0)
 }
