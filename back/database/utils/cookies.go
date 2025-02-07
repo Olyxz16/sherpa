@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -46,7 +45,6 @@ func RandLetterString() (string, error) {
 
 func cookieFromKey(key string) (*http.Cookie) {
     expires := cookie_duration
-    fmt.Printf("%v\n", expires)
     return &http.Cookie {
         Name: "session",
         Value: key,
