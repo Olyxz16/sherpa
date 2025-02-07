@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log/slog"
-
-	"github.com/labstack/echo/v4"
+	"net/http"
 
 	"github.com/Olyxz16/sherpa/database"
 )
@@ -12,10 +12,13 @@ import (
 /* Healthcheck utils */
 /*********************/
 
-func Health(c echo.Context) error {
+func Health(w http.ResponseWriter, r *http.Request) {
     if !database.New().Health() {
         slog.Error("HEALTHCHECK NOT PASSING !")
-        return c.JSON(500, map[string]string {"message": "KO"})
+        resp, _ := json.Marshal(map[string]string {"message": "KO"})
+        w.WriteHeader(500)
+        w.Write(resp)
     }
-    return c.JSON(200, map[string]string {"message": "OK"})
+    resp, _ := json.Marshal(map[string]string {"message": "OK"})
+    w.Write(resp)
 }
