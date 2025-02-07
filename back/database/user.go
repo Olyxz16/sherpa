@@ -53,7 +53,7 @@ func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
     var result UserAuth
     var cookieStr string
     if err := row.Scan(&result.Uid, &cookieStr, &result.EncodedMasterkey, &result.B64filekey) ; err != nil {
-        return nil, err
+        return nil, nil
     }
 
     if cookie, err := utils.UnmarshalCookie(cookieStr) ; err == nil {
