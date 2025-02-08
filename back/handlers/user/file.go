@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/render"
 
-	"github.com/Olyxz16/sherpa/database"
+	"github.com/Olyxz16/sherpa/model"
 )
 
 
@@ -31,7 +31,7 @@ func SaveUserRepoFile(w http.ResponseWriter, r *http.Request) {
         render.JSON(w, r, map[string]string {"message": "Bad request"})
     }
     
-    err = database.SaveFile(cookie, sfr.Source, sfr.RepoName, sfr.FileName, sfr.Content)
+    err = model.SaveFile(cookie, sfr.Source, sfr.RepoName, sfr.FileName, sfr.Content)
     if err != nil {
         w.WriteHeader(500)
         render.JSON(w, r, map[string]string {"message": "Missing data"})
@@ -62,7 +62,7 @@ func FetchUserRepoFile(w http.ResponseWriter, r *http.Request) {
         render.JSON(w, r, map[string]string {"message": "Missing file name"})
     }
     
-    content, err := database.FetchFileContent(cookie, source, repoName, fileName)
+    content, err := model.FetchFileContent(cookie, source, repoName, fileName)
     if err != nil {
         // handle different errors
         w.WriteHeader(500)

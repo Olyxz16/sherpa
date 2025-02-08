@@ -1,11 +1,11 @@
-package database
+package model
 
 import (
 	"fmt"
 	"net/http"
 
-	"github.com/Olyxz16/sherpa/database/utils"
 	"github.com/Olyxz16/sherpa/logging"
+	"github.com/Olyxz16/sherpa/utils"
 )
 
 type PlatformUserAuth struct {
@@ -20,8 +20,7 @@ type PlatformUserAuth struct {
 
 
 func AuthenticateUser(auth PlatformUserAuth) (*UserAuth, bool, error) {
-    db := dbInstance.db
-
+    db := instance.db
     user, isNew, err := GetUserOrCreateFromAuth(auth)
     auth.UserId = user.Uid
     if err != nil {
@@ -68,7 +67,7 @@ func AuthenticateUser(auth PlatformUserAuth) (*UserAuth, bool, error) {
 
 // TODO rows protection when rows length 0
 func TokenFromCookie(cookie *http.Cookie, source string) (string, error) {
-    db := dbInstance.db
+    db := instance.db
     q := `SELECT access_token FROM PlatformUserAuth
             JOIN UserAuth ON UserId = UserId
             WHERE cookie=$1 AND source=$2`
@@ -96,7 +95,7 @@ func init() {
 
 func migrateGithubAuth() {
     New()
-    db := dbInstance.db
+    db := instance.db
 
     migrated, err := isUserMigrated()
     if err != nil {

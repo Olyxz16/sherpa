@@ -5,7 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/Olyxz16/sherpa/database"
+	"github.com/Olyxz16/sherpa/model"
 )
 
 /*********************/
@@ -13,7 +13,7 @@ import (
 /*********************/
 
 func Health(w http.ResponseWriter, r *http.Request) {
-    if !database.New().Health() {
+    if !model.New().Health() {
         slog.Error("HEALTHCHECK NOT PASSING !")
         resp, _ := json.Marshal(map[string]string {"message": "KO"})
         w.WriteHeader(500)

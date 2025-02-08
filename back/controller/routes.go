@@ -1,4 +1,4 @@
-package server
+package controller
 
 import (
 	"io/fs"
@@ -15,8 +15,8 @@ import (
 
 func RegisterRoutes() http.Handler {
     r := chi.NewRouter()
-    r.Use(middleware.Recoverer)
     r.Use(middleware.Logger)
+    r.Use(middleware.Recoverer)
 
     staticFS := http.FileServer(http.FS(staticDir))
     r.Handle("/*", staticFS)

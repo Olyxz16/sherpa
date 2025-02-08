@@ -1,15 +1,15 @@
-package database
+package model
 
 import (
     "context"
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
-	_ "github.com/joho/godotenv/autoload"
     _ "github.com/jackc/pgx/v5/stdlib"
+
+	"github.com/Olyxz16/sherpa/config"
 )
 
 type Service interface {
@@ -21,28 +21,27 @@ type service struct {
 }
 
 var (
-	database   = os.Getenv("DB_DATABASE")
-	password   = os.Getenv("DB_PASSWORD")
-	username   = os.Getenv("DB_USERNAME")
-	port       = os.Getenv("DB_PORT")
-	host       = os.Getenv("DB_HOST")
-	dbInstance *service
+	instance *service
 )
 
 func New() Service {
 	// Reuse Connection
-	if dbInstance != nil {
-		return dbInstance
+	if instance != nil {
+		return instance
 	}
-	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", username, password, host, port, database)
+    cfg, err := config.NewDatabaseConfig()
+    if err != nil {
+        panic("Error loading database config")
+    }
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable", cfg.User, cfg.Pass, cfg.Host, cfg.Port, cfg.DBName)
 	db, err := sql.Open("pgx", connStr)
 	if err != nil {
         log.Fatal(err)
     }
-    dbInstance = &service{
+    instance = &service{
 		db: db,
 	}
-	return dbInstance
+	return instance
 }
 
 func (s *service) Health() bool {

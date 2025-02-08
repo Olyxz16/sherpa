@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Olyxz16/sherpa/database"
+	"github.com/Olyxz16/sherpa/model"
 	"github.com/Olyxz16/sherpa/logging"
 )
 
@@ -31,7 +31,7 @@ func AuthGithubLogin(w http.ResponseWriter, r *http.Request) {
     
     platformAuth.PlatformId = data.PlatformID
     
-    userAuth, isNew, err := database.AuthenticateUser(*platformAuth)
+    userAuth, isNew, err := model.AuthenticateUser(*platformAuth)
     if err != nil {
         http.Redirect(w, r, "/auth_error", 302)
     }
@@ -43,7 +43,7 @@ func AuthGithubLogin(w http.ResponseWriter, r *http.Request) {
     http.Redirect(w, r, "/", 302)
 }
 
-func exchangeCode(code string) (*database.PlatformUserAuth, error) {
+func exchangeCode(code string) (*model.PlatformUserAuth, error) {
     params := url.Values{}
     params.Set("client_id", os.Getenv("CLIENT_ID"))
     params.Set("client_secret", os.Getenv("CLIENT_SECRET"))
@@ -67,7 +67,7 @@ func exchangeCode(code string) (*database.PlatformUserAuth, error) {
     json.NewDecoder(resp.Body).Decode(&data)
     expires_in := data["expires_in"].(float64)
     refresh_expires_in := data["refresh_token_expires_in"].(float64)
-    result := &database.PlatformUserAuth {
+    result := &model.PlatformUserAuth {
         Source: "github.com",
         Access_token: data["access_token"].(string),
         Refresh_token: data["refresh_token"].(string),

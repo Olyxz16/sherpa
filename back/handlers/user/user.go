@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/render"
 
-	"github.com/Olyxz16/sherpa/database"
+	"github.com/Olyxz16/sherpa/model"
 	"github.com/Olyxz16/sherpa/handlers/github"
 )
 
@@ -23,7 +23,7 @@ func FetchUser(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(401)
         render.JSON(w, r, map[string]string {"message": "Missing cookie"})
     }
-    access_token, err := database.TokenFromCookie(cookie, source)
+    access_token, err := model.TokenFromCookie(cookie, source)
     if err != nil {
         w.WriteHeader(401)
         render.JSON(w, r, map[string]string {"message": "Unauthorized"})
@@ -54,7 +54,7 @@ func SetUserMasterkey(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(401)
         render.JSON(w, r, map[string]string {"message": "Missing cookie"})
     }
-    err = database.SetUserMasterkey(cookie, mkr.Masterkey)      
+    err = model.SetUserMasterkey(cookie, mkr.Masterkey)      
     if err != nil {
         w.WriteHeader(500)
         render.JSON(w, r, map[string]string {"message": "Error"})

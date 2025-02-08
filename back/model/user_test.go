@@ -1,4 +1,4 @@
-package database
+package model
 
 import (
 	"encoding/base64"
@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/Olyxz16/sherpa/database/utils"
+	"github.com/Olyxz16/sherpa/utils"
 )
 
 /*************************/
@@ -165,7 +165,7 @@ func mockUserIdFromPlatform(platform PlatformUserAuth) (*UserAuth, error) {
 }
 
 func clean() error {
-    db := dbInstance.db
+    db := instance.db
     q := `TRUNCATE TABLE UserAuth CASCADE`
     if _, err := db.Exec(q) ; err != nil {
         return err
@@ -177,7 +177,7 @@ func clean() error {
     return nil
 }
 func insertPlatform(auth PlatformUserAuth) error {
-    db := dbInstance.db
+    db := instance.db
     q := `INSERT INTO PlatformUserAuth
         (userId, platformId, source, access_token, expires_in, refresh_token, rt_expires_in)
         VALUES ($1, $2, $3, $4, $5, $6, $7)`
@@ -188,7 +188,7 @@ func insertPlatform(auth PlatformUserAuth) error {
     return nil
 }
 func insertUser(user UserAuth) error {
-    db := dbInstance.db
+    db := instance.db
     q := `INSERT INTO UserAuth
         (uid, cookie)
         VALUES ($1, $2)`

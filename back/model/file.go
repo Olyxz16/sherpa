@@ -1,10 +1,10 @@
-package database
+package model
 
 import (
 	"encoding/base64"
 	"net/http"
 
-	"github.com/Olyxz16/sherpa/database/utils"
+	"github.com/Olyxz16/sherpa/utils"
 )
 
 type FileData struct {
@@ -18,7 +18,7 @@ type FileData struct {
 
 // Error handling for missing cookie, repo or file
 func FetchFileContent(cookie *http.Cookie, source, repoName, fileName string) (string, error) {
-    db := dbInstance.db
+    db := instance.db
     q := `SELECT b64content, b64nonce, b64filekey FROM FileData
             INNER JOIN (
                 SELECT uid, b64filekey FROM UserAuth
@@ -55,7 +55,7 @@ func FetchFileContent(cookie *http.Cookie, source, repoName, fileName string) (s
 }
 
 func SaveFile(cookie *http.Cookie, source, repoName, fileName, content string) error {
-    db := dbInstance.db
+    db := instance.db
 
     user, err := getUserFromCookie(cookie)
     if err != nil {
@@ -101,7 +101,7 @@ func init() {
 
 func migrateFileData() {
     New()
-    db := dbInstance.db
+    db := instance.db
 
     migrated, err := isUserMigrated()
     if err != nil {

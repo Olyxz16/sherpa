@@ -1,10 +1,10 @@
-package database
+package model
 
 import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/Olyxz16/sherpa/database/utils"
+	"github.com/Olyxz16/sherpa/utils"
 )
 
 func TestFetchSingleUserSingleFileData(t *testing.T) {
@@ -120,7 +120,7 @@ func mockFileDataFromUser(userAuth UserAuth) (string, *FileData, error) {
 }
 
 func insertFileData(file FileData) (error) {
-    db := dbInstance.db
+    db := instance.db
     q := `INSERT INTO FileData
         (ownerId, source, reponame, filename, b64content, b64nonce)
         VALUES ($1, $2, $3, $4, $5, $6)`

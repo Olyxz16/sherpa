@@ -11,7 +11,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/Olyxz16/sherpa/server"
+	"github.com/Olyxz16/sherpa/controller"
 )
 
 //go:embed static/*
@@ -23,7 +23,8 @@ func main() {
     if err != nil {
         panic("Static folder static/ missing !") 
     }
-    server := server.NewServer(f)
+
+    server := controller.NewServer(f)
 
     go func() {
         err := server.ListenAndServe()

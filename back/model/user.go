@@ -1,11 +1,11 @@
-package database
+package model
 
 import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
 
-	"github.com/Olyxz16/sherpa/database/utils"
+	"github.com/Olyxz16/sherpa/utils"
 	"github.com/Olyxz16/sherpa/logging"
 )
 
@@ -20,7 +20,7 @@ type UserAuth struct {
 
 
 func getUserFromCookie(cookie *http.Cookie) (*UserAuth, error) {
-    db := dbInstance.db
+    db := instance.db
     
     q := `SELECT uid, encodedMasterkey, salt, b64filekey FROM UserAuth
             WHERE cookie=$1`
@@ -43,7 +43,7 @@ func getUserFromCookie(cookie *http.Cookie) (*UserAuth, error) {
 
 
 func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
-    db := dbInstance.db
+    db := instance.db
     q := `SELECT uid, cookie, encodedMasterkey, b64filekey FROM UserAuth
             JOIN PlatformUserAuth ON uid = userId
             WHERE platformId=$1`
@@ -67,7 +67,7 @@ func GetUserFromPlatformId(user PlatformUserAuth) (*UserAuth, error) {
 
 // TODO Handle cookie collision
 func GetUserOrCreateFromAuth(platformUser PlatformUserAuth) (*UserAuth, bool, error) {
-    db := dbInstance.db
+    db := instance.db
     currUser, err := GetUserFromPlatformId(platformUser)
     if err != nil {
         logging.ErrLog(fmt.Sprintf("GetUserOrCreateFromAuth : %v", err))
@@ -112,7 +112,7 @@ func GetUserOrCreateFromAuth(platformUser PlatformUserAuth) (*UserAuth, bool, er
 }
 
 func SetUserMasterkey(cookie *http.Cookie, masterkey string) (error) {
-    db := dbInstance.db
+    db := instance.db
     q := `UPDATE UserAuth
         SET encodedMasterkey=$1,
         salt=$2,
@@ -162,7 +162,7 @@ func init() {
 
 func migrateUserAuth() {
     New()
-    db := dbInstance.db
+    db := instance.db
     q := `CREATE TABLE IF NOT EXISTS UserAuth (
         uid                 SERIAL PRIMARY KEY,
         cookie              TEXT UNIQUE DEFAULT '',
@@ -177,7 +177,7 @@ func migrateUserAuth() {
 }
 
 func isUserMigrated() (bool, error) {
-    db := dbInstance.db
+    db := instance.db
     q := `SELECT EXISTS (
     SELECT FROM
     pg_tables

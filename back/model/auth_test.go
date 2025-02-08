@@ -1,10 +1,10 @@
-package database
+package model
 
 import (
 	"math/rand"
 	"testing"
 
-    "github.com/Olyxz16/sherpa/database/utils"
+    "github.com/Olyxz16/sherpa/utils"
 )
 
 
@@ -95,7 +95,7 @@ func TestAuthenticateExistingUser(t *testing.T) {
 
 
 func userIdFromPlatformId(platform PlatformUserAuth) (int, bool, error) {
-    db := dbInstance.db
+    db := instance.db
     q := `SELECT userId FROM PlatformUserAuth
         WHERE platformId=$1`
     row := db.QueryRow(q, platform.PlatformId)
