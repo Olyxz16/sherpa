@@ -11,6 +11,12 @@ import (
 	"github.com/Olyxz16/sherpa/logging"
 )
 
+type githubAccessToken struct {
+    AccessToken     string  `json:"access_token"` 
+    RefreshToken    string  `json:"refresh_token"`
+    ExpiresIn       int     `json:"expires_in"`
+    RefExpiresIn    int     `json:"refresh_token_expires_in"`
+}
 
 func AuthGithubLogin(w http.ResponseWriter, r *http.Request) {
     code := r.URL.Query().Get("code")
@@ -62,17 +68,19 @@ func exchangeCode(code string) (*model.PlatformUserAuth, error) {
         logging.ErrLog("[Exchange code] : response")
         return nil, err
     }
-    
-    var data map[string]interface{}
-    json.NewDecoder(resp.Body).Decode(&data)
-    expires_in := data["expires_in"].(float64)
-    refresh_expires_in := data["refresh_token_expires_in"].(float64)
+    defer resp.Body.Close()
+
+    var data githubAccessToken
+    err = json.NewDecoder(resp.Body).Decode(&data)
+    if err != nil {
+        return nil, err
+    }
     result := &model.PlatformUserAuth {
         Source: "github.com",
-        Access_token: data["access_token"].(string),
-        Refresh_token: data["refresh_token"].(string),
-        Expires_in: int(expires_in),
-        Refresh_expires_in: int(refresh_expires_in),
+        Access_token: data.AccessToken,
+        Refresh_token: data.RefreshToken,
+        Expires_in: data.ExpiresIn,
+        Refresh_expires_in: data.RefExpiresIn,
     }
     return result, nil
 }
