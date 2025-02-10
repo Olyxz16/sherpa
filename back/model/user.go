@@ -2,11 +2,11 @@ package model
 
 import (
 	"encoding/base64"
-	"fmt"
 	"net/http"
 
+    "go.uber.org/zap"
+
 	"github.com/Olyxz16/sherpa/utils"
-	"github.com/Olyxz16/sherpa/logging"
 )
 
 
@@ -70,7 +70,7 @@ func GetUserOrCreateFromAuth(platformUser PlatformUserAuth) (*UserAuth, bool, er
     db := instance.db
     currUser, err := GetUserFromPlatformId(platformUser)
     if err != nil {
-        logging.ErrLog(fmt.Sprintf("GetUserOrCreateFromAuth : %v", err))
+        zap.L().DPanic("GetUserOrCreateFromAuth", zap.Error(err))
         return nil, false, err
     }
     if currUser != nil {
@@ -127,12 +127,12 @@ func SetUserMasterkey(cookie *http.Cookie, masterkey string) (error) {
 
     cookieStr, err := utils.MarshalCookie(cookie)
     if err != nil {
-        logging.ErrLog(fmt.Sprintf("SetUserMasterkey : %v", err))
+        zap.L().Error("SetUserMasterkey", zap.Error(err))
         return err
     }
     encodedMasterkey, b64Salt, b64Hash, err := utils.HashFromMasterkey(masterkey)
     if err != nil {
-        logging.ErrLog(fmt.Sprintf("SetUserMasterkey : %v", err))
+        zap.L().Error("SetUserMasterkey", zap.Error(err))
         return err
     }
     hash, err := base64.StdEncoding.DecodeString(b64Hash)
@@ -145,7 +145,7 @@ func SetUserMasterkey(cookie *http.Cookie, masterkey string) (error) {
     }
 
     if _, err := tx.Exec(q, encodedMasterkey, b64Salt, b64Filekey, cookieStr) ; err != nil {
-        logging.ErrLog(fmt.Sprintf("SetUserMasterkey : %v", err))
+        zap.L().Error("SetUserMasterkey", zap.Error(err))
         return err
     }
 

@@ -2,8 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
-	"log/slog"
 	"net/http"
+
+    "go.uber.org/zap"
 
 	"github.com/Olyxz16/sherpa/model"
 )
@@ -14,7 +15,7 @@ import (
 
 func Health(w http.ResponseWriter, r *http.Request) {
     if !model.New().Health() {
-        slog.Error("HEALTHCHECK NOT PASSING !")
+        zap.L().Error("HEALTHCHECK NOT PASSING !")
         resp, _ := json.Marshal(map[string]string {"message": "KO"})
         w.WriteHeader(500)
         w.Write(resp)

@@ -5,12 +5,14 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
+    "go.uber.org/zap"
+
+	"github.com/Olyxz16/sherpa/config"
 	"github.com/Olyxz16/sherpa/controller"
 )
 
@@ -24,12 +26,13 @@ func main() {
         panic("Static folder static/ missing !") 
     }
 
+	config.DefaultLogger()
     server := controller.NewServer(f)
 
     go func() {
         err := server.ListenAndServe()
         if err != http.ErrServerClosed {
-            slog.Error("Server error !")
+            zap.L().Info("Server error !")
             os.Exit(1)
         }
     }()
@@ -41,10 +44,10 @@ func main() {
     )
 
     <-ch
-    slog.Error("os.Interrupt - shutting down...")
+    zap.L().Error("os.Interrupt - shutting down...")
     go func() {
         <-ch
-        slog.Error("os.Kill - terminating...")
+        zap.L().Error("os.Kill - terminating...")
     }()
 
     gracefulCtx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
@@ -52,10 +55,10 @@ func main() {
 
     err = server.Shutdown(gracefulCtx)
     if err != nil {
-        slog.Error(fmt.Sprintf("Shutdown error : %v", err))
+        zap.L().Error(fmt.Sprintf("Shutdown error : %v", err))
         os.Exit(1)
     }
-    slog.Info("Gracefully stopped")
+    zap.L().Info("Gracefully stopped")
 
     os.Exit(0)
 }

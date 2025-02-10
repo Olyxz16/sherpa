@@ -7,7 +7,7 @@ import (
 	"strings"
 	"encoding/json"
 
-    "github.com/Olyxz16/sherpa/logging"
+    "go.uber.org/zap"
 )
 
 
@@ -96,7 +96,7 @@ func getUserRepos(access_token string, data *UserData) (error) {
     nextPage := func() bool { 
         req, err := http.NewRequest("GET", url, nil)
         if err != nil {
-            logging.ErrLog(fmt.Sprintf("GetUserRepos: %v", err.Error()))
+            zap.L().DPanic("GetUserRepos", zap.Error(err))
             return false
         }
         req.Header.Add("Accept", "*/*")
@@ -106,7 +106,7 @@ func getUserRepos(access_token string, data *UserData) (error) {
         req.Header.Add("X-Accepted-GitHub-Permissions", "metadata=read")
         resp, err := http.DefaultClient.Do(req)
         if err != nil {
-            logging.ErrLog(fmt.Sprintf("GetUserRepos: %v", err.Error()))
+            zap.L().DPanic("GetUserRepos", zap.Error(err))
             return false
         }
         defer resp.Body.Close()
@@ -114,7 +114,7 @@ func getUserRepos(access_token string, data *UserData) (error) {
         var body []map[string]interface{}
         err = json.NewDecoder(resp.Body).Decode(&body)
         if err != nil {
-            logging.ErrLog(fmt.Sprintf("GetUserRepos: %v", err.Error()))
+            zap.L().DPanic("GetUserRepos", zap.Error(err))
             return false
         }
 

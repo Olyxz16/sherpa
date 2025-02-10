@@ -1,10 +1,8 @@
 package model
 
 import (
-	"fmt"
 	"net/http"
 
-	"github.com/Olyxz16/sherpa/logging"
 	"github.com/Olyxz16/sherpa/utils"
 )
 
@@ -55,7 +53,6 @@ func AuthenticateUser(auth PlatformUserAuth) (*UserAuth, bool, error) {
         auth.Refresh_token,
         auth.Refresh_expires_in)
     if err != nil {
-        logging.ErrLog(fmt.Sprintf("AuthenticateUser : %v", err))
         return nil, false, err
     }
 

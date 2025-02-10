@@ -5,14 +5,15 @@ import (
 )
 
 type ServerConfig struct {
-    Host    string  `env:"HOST" default:"0.0.0.0"`
-    Port    int     `env:"PORT" default:"8080"`
+    Host    string  `env:"HOST"  default:"0.0.0.0"`
+    Port    int     `env:"PORT"  default:"8080"`
+    Debug   bool    `env:"DEBUG" default:"false"`
 }
 
 type DatabaseConfig struct {
     DBName  string  `env:"DB_DATABASE" default:"sherpa"`
-    Host    string  `env:"DB_HOST" default:"localhost"`
-    Port    int     `env:"DB_PORT" default:"5432"`
+    Host    string  `env:"DB_HOST"     default:"localhost"`
+    Port    int     `env:"DB_PORT"     default:"5432"`
     User    string  `env:"DB_USERNAME"`
     Pass    string  `env:"DB_PASSWORD"`
 }

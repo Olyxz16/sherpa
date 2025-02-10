@@ -3,9 +3,10 @@ package controller
 import (
 	"fmt"
 	"io/fs"
-	"log/slog"
 	"net/http"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/Olyxz16/sherpa/config"
 	"github.com/Olyxz16/sherpa/model"
@@ -33,7 +34,7 @@ func NewServer(fs fs.FS) *http.Server {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
-    slog.Info(fmt.Sprintf("Starting server at %s:%d ...", cfg.Host, cfg.Port))
+    zap.L().Sugar().Infof("Starting server at %s:%d ...", cfg.Host, cfg.Port)
 
 	return server
 }

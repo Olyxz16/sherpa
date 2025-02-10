@@ -7,8 +7,9 @@ import (
 	"os"
 	"strings"
 
+    "go.uber.org/zap"
+
 	"github.com/Olyxz16/sherpa/model"
-	"github.com/Olyxz16/sherpa/logging"
 )
 
 type githubAccessToken struct {
@@ -58,14 +59,14 @@ func exchangeCode(code string) (*model.PlatformUserAuth, error) {
     url := "https://github.com/login/oauth/access_token"
     req, err := http.NewRequest("POST", url, strings.NewReader(params.Encode()))
     if err != nil {
-        logging.ErrLog("[Exchange code] : request")
+        zap.L().DPanic("[Echange code] : request", zap.Error(err))
         return nil, err
     }
     req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
     req.Header.Add("Accept", "application/json")
     resp, err := http.DefaultClient.Do(req)
     if err != nil {
-        logging.ErrLog("[Exchange code] : response")
+        zap.L().DPanic("[Exchange code] : response", zap.Error(err))
         return nil, err
     }
     defer resp.Body.Close()

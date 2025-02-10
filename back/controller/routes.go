@@ -2,21 +2,23 @@ package controller
 
 import (
 	"io/fs"
-	"log/slog"
 	"net/http"
 
+    "go.uber.org/zap"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/Olyxz16/sherpa/handlers"
 	"github.com/Olyxz16/sherpa/handlers/github"
 	"github.com/Olyxz16/sherpa/handlers/user"
+    mw "github.com/Olyxz16/sherpa/middleware"
 )
 
 func RegisterRoutes() http.Handler {
     r := chi.NewRouter()
     r.Use(middleware.Logger)
     r.Use(middleware.Recoverer)
+    r.Use(mw.Logger)
 
     staticFS := http.FileServer(http.FS(staticDir))
     r.Handle("/*", staticFS)
@@ -50,7 +52,7 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
     }
     _, err = w.Write(content)
     if err != nil {
-        slog.Warn(err.Error())
+        zap.L().Warn(err.Error())
         return
     }
 }
