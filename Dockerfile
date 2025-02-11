@@ -26,7 +26,7 @@ RUN go mod download
 RUN go mod verify
 
 COPY back/ ./
-COPY --from=build-front /dist/ ./static/
+COPY --from=build-front /dist/ ./cmd/server/static/
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags='-w -s -extldflags "-static"' -a -o /build/main cmd/server/main.go
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags='-w -s -extldflags "-static"' -a -o /build/healthcheck cmd/healthcheck/main.go
 
