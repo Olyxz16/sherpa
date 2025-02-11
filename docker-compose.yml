@@ -12,7 +12,7 @@ services:
       DB_HOST: psql
       DB_PORT: 5432
     ports:
-      - "${PORT}:8080"
+      - "${WEB_PORT}:8080"
     depends_on:
       psql:
         condition: service_healthy
