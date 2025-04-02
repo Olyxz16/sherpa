@@ -1,0 +1,10 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "infrastructure/persistence/query/"
+    schema: "infrastructure/persistence/"
+    gen:
+      go:
+        package: "db"
+        out: "infrastructure/persistence/sqlc"
+        sql_package: "pgx/v5"

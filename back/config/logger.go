@@ -5,18 +5,16 @@ import (
 )
 
 func DefaultLogger() *zap.Logger {
-    cfg, err := NewServerConfig() 
-    if err != nil {
-        panic("Cannot create config")
-    }
+    cfg := NewServerConfig() 
 	var logger *zap.Logger
+	var err error
     if cfg.Debug {
-        logger, err = zap.NewDevelopment()
+		logger, err = zap.NewDevelopment()
         if err != nil {
             panic("Cannot create development logger")
         }
     } else {
-        logger, err = zap.NewProduction()
+		logger, err = zap.NewProduction()
         if err != nil {
             panic("Cannot create development logger")
         }

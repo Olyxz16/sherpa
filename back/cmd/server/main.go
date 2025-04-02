@@ -10,10 +10,11 @@ import (
 	"os/signal"
 	"time"
 
-    "go.uber.org/zap"
+	"go.uber.org/zap"
 
 	"github.com/Olyxz16/sherpa/config"
-	"github.com/Olyxz16/sherpa/controller"
+	"github.com/Olyxz16/sherpa/infrastructure/persistence"
+	controller "github.com/Olyxz16/sherpa/interfaces/http"
 )
 
 //go:embed static/*
@@ -27,7 +28,8 @@ func main() {
     }
 
 	config.DefaultLogger()
-    server := controller.NewServer(f)
+    server := controller.NewServer(f, config.NewServerConfig())
+	_ = persistence.New(config.NewDatabaseConfig())
 
     go func() {
         err := server.ListenAndServe()
