@@ -28,14 +28,14 @@ func AuthGithubLogin(w http.ResponseWriter, r *http.Request) {
     code := r.URL.Query().Get("code")
     if code == "" {
 		zap.L().DPanic("Error parsing github callback code")
-        http.Redirect(w, r, "/auth_error", 302)
+        http.Redirect(w, r, "/", 401)
 		return
     }
 
     token, err := exchangeCode(code)
     if err != nil {
 		zap.L().DPanic("Error exchanging code", zap.Error(err))
-        http.Redirect(w, r, "/auth_error", 302)
+        http.Redirect(w, r, "/", 401)
 		return
     }
 
@@ -43,7 +43,7 @@ func AuthGithubLogin(w http.ResponseWriter, r *http.Request) {
     err = getUserName(token.AccessToken, data)
     if err != nil {
 		zap.L().DPanic("Error fetching user data", zap.Error(err))
-        http.Redirect(w, r, "/auth_error", 302)
+        http.Redirect(w, r, "/", 401)
 		return
     }
 
@@ -65,6 +65,10 @@ func AuthGithubLogin(w http.ResponseWriter, r *http.Request) {
 		)
 		defer authRepo.Persist(auth, r.Context())
 		defer userRepo.Persist(user, r.Context())
+	} else if err != nil {
+		zap.L().DPanic("Error fetching user auth", zap.Error(err))
+		render.JSON(w, r, map[string]string{"message": "Internal server error"})
+		return
 	} else {
 		auth.Refresh(token.AccessToken, token.RefreshToken, token.ExpiresIn, token.RefExpiresIn)
 		defer authRepo.Persist(auth, r.Context())
