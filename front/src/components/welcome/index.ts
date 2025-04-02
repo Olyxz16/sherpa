@@ -13,9 +13,5 @@ export default async function submitMasterkey(masterkey: string) {
     },
     body: JSON.stringify(data)
   });
-  if(resp.ok) {
-    router.push({path: '/'})
-  } else {
-    router.push({path: '/autherr'})
-  }
+  router.push({path: '/'})
 }
