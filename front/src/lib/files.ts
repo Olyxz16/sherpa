@@ -44,13 +44,12 @@ export async function fetchFile(source: string, repoName: string, fileName: stri
   try {
     const resp = await fetch(query);
     if(!resp.ok) {
-      return ""
+      return "";
     }
-    const jsonStr = await resp.json() as string
-    const json = JSON.parse(jsonStr) as FetchFileResponse
+    const json = await resp.json() as FetchFileResponse
     content = json.content;
   } catch(e) {
-    return ""
+    return "";
   }
   return content;
 }
