@@ -6,7 +6,7 @@ services:
       dockerfile: ./Dockerfile
     environment:
       HOST: ${HOST}
-      PORT: ${PORT}
+      PORT: 8080
       JWT_KEY: ${JWT_KEY}
       GITHUB_ID: ${GITHUB_ID}
       GITHUB_SECRET: ${GITHUB_SECRET}
