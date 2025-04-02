@@ -1,20 +1,12 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import type { UserData } from '@/types/UserData'
-import { useCookies } from '@vueuse/integrations/useCookies'
 import fetchUser from '@/lib/fetchUser';
 
 export async function tryLoadUserData() {
-  const cookies = useCookies(["session"]);
-  const session = cookies.get("session");
-  if(session) {
-    const loaded = loadCache();
-    if(!loaded) {
-      const fetched = await fetchUser(session);
-      if(!fetched) {
-        cookies.remove("session");
-      }
-    }
+  const loaded = loadCache();
+  if(!loaded) {
+    const fetched = await fetchUser();
   }
 }
 
