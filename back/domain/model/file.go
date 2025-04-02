@@ -16,13 +16,22 @@ type File struct {
 }
 
 func NewFile(owner *User, source AuthSource, reponame, filename, b64content, b64nonce string) *File {
-	return &File {
+	return &File{
 		owner: owner,
 		source: source,
 		reponame: reponame,
 		filename: filename,
 		b64content: b64content,
 		b64nonce: b64nonce,
+	}
+}
+
+func CreateFile(owner *User, source AuthSource, reponame, filename string) *File {
+	return &File {
+		owner: owner,
+		source: source,
+		reponame: reponame,
+		filename: filename,
 	}
 }
 

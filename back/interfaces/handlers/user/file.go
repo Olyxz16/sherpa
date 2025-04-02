@@ -1,10 +1,11 @@
 package user
 
 import (
-	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/render"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/Olyxz16/sherpa/domain/model"
 	"github.com/Olyxz16/sherpa/infrastructure/persistence/repository"
@@ -35,12 +36,8 @@ func SaveUserRepoFile(w http.ResponseWriter, r *http.Request) {
     }
     
 	fileRepo := repository.NewFileRepository()
-	file, err := fileRepo.Find(user, model.AuthSource(sfr.Source), sfr.RepoName, sfr.FileName, r.Context())
-    if err != nil {
-        w.WriteHeader(500)
-        render.JSON(w, r, map[string]string {"message": "Missing data"})
-		return
-    }
+	source := model.AuthSource(sfr.Source)
+	file := model.CreateFile(user, source, sfr.RepoName, sfr.FileName);
 
 	err = file.Encrypt(sfr.Content)
     if err != nil {
@@ -89,7 +86,10 @@ func FetchUserRepoFile(w http.ResponseWriter, r *http.Request) {
     
 	fileRepo := repository.NewFileRepository()
 	file, err := fileRepo.Find(user, model.AuthSource(source), reponame, filename, r.Context())
-    if err != nil {
+    if err != nil && errors.Is(err, pgx.ErrNoRows) {
+        render.JSON(w, r, map[string]string {"content": ""})
+		return
+	} else if err != nil {
         w.WriteHeader(404)
         render.JSON(w, r, map[string]string {"message": "Missing data"})
 		return
@@ -104,11 +104,5 @@ func FetchUserRepoFile(w http.ResponseWriter, r *http.Request) {
 
     response := make(map[string]interface{})
     response["content"] = content
-    json, err := json.Marshal(response)
-    if err != nil {
-        w.WriteHeader(500)
-        render.JSON(w, r, map[string]string {"message": "Error fetch file"})
-		return
-    }
-	render.JSON(w, r, json)
+	render.JSON(w, r, response)
 }
