@@ -8,7 +8,7 @@ ON CONFLICT DO NOTHING;
 
 -- name: FindAuthById :one
 SELECT * FROM "Auth" a
-JOIN "User" u on u.id = a.userId
+JOIN "User" u on u.id = a.user_id
 WHERE a.id = $1
 LIMIT 1;
 

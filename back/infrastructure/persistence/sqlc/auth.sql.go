@@ -13,7 +13,7 @@ import (
 
 const findAuthById = `-- name: FindAuthById :one
 SELECT a.id, user_id, source, access_token, expires_in, refresh_token, rt_expires_in, u.id, username, masterkey, b64salt, b64filekey FROM "Auth" a
-JOIN "User" u on u.id = a.userId
+JOIN "User" u on u.id = a.user_id
 WHERE a.id = $1
 LIMIT 1
 `
