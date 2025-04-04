@@ -9,8 +9,8 @@ import (
 )
 
 type Auth struct {
-	Uid          int32
-	Userid       int32
+	ID           int32
+	UserID       pgtype.Int4
 	Source       pgtype.Text
 	AccessToken  pgtype.Text
 	ExpiresIn    pgtype.Float8
@@ -19,7 +19,7 @@ type Auth struct {
 }
 
 type File struct {
-	Ownerid    int32
+	OwnerID    int32
 	Source     string
 	Reponame   string
 	Filename   string
@@ -27,8 +27,8 @@ type File struct {
 	B64nonce   pgtype.Text
 }
 
-type Userdatum struct {
-	Uid        int32
+type User struct {
+	ID         int32
 	Username   string
 	Masterkey  pgtype.Text
 	B64salt    pgtype.Text

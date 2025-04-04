@@ -12,12 +12,12 @@ import (
 )
 
 const findAllFiles = `-- name: FindAllFiles :many
-SELECT ownerid, source, reponame, filename, b64content, b64nonce FROM File
-WHERE ownerId = $1
+SELECT owner_id, source, reponame, filename, b64content, b64nonce FROM "File"
+WHERE owner_id = $1
 `
 
-func (q *Queries) FindAllFiles(ctx context.Context, ownerid int32) ([]File, error) {
-	rows, err := q.db.Query(ctx, findAllFiles, ownerid)
+func (q *Queries) FindAllFiles(ctx context.Context, ownerID int32) ([]File, error) {
+	rows, err := q.db.Query(ctx, findAllFiles, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func (q *Queries) FindAllFiles(ctx context.Context, ownerid int32) ([]File, erro
 	for rows.Next() {
 		var i File
 		if err := rows.Scan(
-			&i.Ownerid,
+			&i.OwnerID,
 			&i.Source,
 			&i.Reponame,
 			&i.Filename,
@@ -44,8 +44,8 @@ func (q *Queries) FindAllFiles(ctx context.Context, ownerid int32) ([]File, erro
 }
 
 const findFile = `-- name: FindFile :one
-SELECT ownerid, source, reponame, filename, b64content, b64nonce FROM File
-WHERE ownerId = $1 
+SELECT owner_id, source, reponame, filename, b64content, b64nonce FROM "File"
+WHERE owner_id = $1 
 AND source = $2
 AND reponame = $3
 AND filename = $4
@@ -53,7 +53,7 @@ LIMIT 1
 `
 
 type FindFileParams struct {
-	Ownerid  int32
+	OwnerID  int32
 	Source   string
 	Reponame string
 	Filename string
@@ -61,14 +61,14 @@ type FindFileParams struct {
 
 func (q *Queries) FindFile(ctx context.Context, arg FindFileParams) (File, error) {
 	row := q.db.QueryRow(ctx, findFile,
-		arg.Ownerid,
+		arg.OwnerID,
 		arg.Source,
 		arg.Reponame,
 		arg.Filename,
 	)
 	var i File
 	err := row.Scan(
-		&i.Ownerid,
+		&i.OwnerID,
 		&i.Source,
 		&i.Reponame,
 		&i.Filename,
@@ -79,15 +79,15 @@ func (q *Queries) FindFile(ctx context.Context, arg FindFileParams) (File, error
 }
 
 const persistFile = `-- name: PersistFile :exec
-INSERT INTO File (
-    ownerId, source, reponame, filename, b64content, b64nonce    
+INSERT INTO "File" (
+    owner_id, source, reponame, filename, b64content, b64nonce    
 ) VALUES (
     $1, $2, $3, $4, $5, $6
 )
 `
 
 type PersistFileParams struct {
-	Ownerid    int32
+	OwnerID    int32
 	Source     string
 	Reponame   string
 	Filename   string
@@ -97,7 +97,7 @@ type PersistFileParams struct {
 
 func (q *Queries) PersistFile(ctx context.Context, arg PersistFileParams) error {
 	_, err := q.db.Exec(ctx, persistFile,
-		arg.Ownerid,
+		arg.OwnerID,
 		arg.Source,
 		arg.Reponame,
 		arg.Filename,

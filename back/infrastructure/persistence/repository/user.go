@@ -22,7 +22,7 @@ func NewUserRepository() *UserRepository {
 
 func (r *UserRepository) Persist(user *model.User, ctx context.Context) error {
 	params := db.PersistUserParams {
-		Uid: int32(user.GetID()),
+		ID: int32(user.GetID()),
 		Username: user.GetUsername(),
 		Masterkey: pgtype.Text{String: user.GetMasterkey(), Valid: true},
 		B64salt: pgtype.Text{String: user.GetB64Salt(), Valid: true},
@@ -38,7 +38,7 @@ func (r *UserRepository) FindFromID(uid int, ctx context.Context) (*model.User, 
 		return nil, err;
 	}
 	user := model.NewUser(
-		int(data.Uid), 
+		int(data.ID), 
 		data.Username,
 		data.Masterkey.String, 
 		data.B64salt.String, 
@@ -54,7 +54,7 @@ func (r *UserRepository) FindFromPlatformID(auth *model.Auth, ctx context.Contex
 		return nil, err
 	}
 	user := model.NewUser(
-		int(data.Uid),
+		int(data.ID),
 		data.Username,
 		data.Masterkey.String,
 		data.B64salt.String,
@@ -65,7 +65,7 @@ func (r *UserRepository) FindFromPlatformID(auth *model.Auth, ctx context.Contex
 
 func (r *UserRepository) UpdateMasterKey(user *model.User, ctx context.Context) error {
 	params := db.UpdateMasterkeyParams{
-		Uid: int32(user.GetID()),
+		ID: int32(user.GetID()),
 		Masterkey: pgtype.Text{String: user.GetMasterkey(), Valid: true},
 		B64salt: pgtype.Text{String: user.GetB64Salt(), Valid: true},
 		B64filekey: pgtype.Text{String: user.GetB64Filekey(), Valid: true},

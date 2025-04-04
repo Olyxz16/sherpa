@@ -6,7 +6,7 @@ const (
 )
 
 type Auth struct {
-	uid					int
+	id					int
 	user				*User
 	source				AuthSource
     access_token        string
@@ -15,9 +15,9 @@ type Auth struct {
     refresh_expires_in  int
 }
 
-func NewAuth(uid int, user *User, source AuthSource, access_token, refresh_token string, expires_in, refresh_expires_in int) *Auth {
+func NewAuth(id int, user *User, source AuthSource, access_token, refresh_token string, expires_in, refresh_expires_in int) *Auth {
 	return &Auth{
-		uid: uid,
+		id: id,
 		user: user,
 		source: source,
 		access_token: access_token,
@@ -28,7 +28,7 @@ func NewAuth(uid int, user *User, source AuthSource, access_token, refresh_token
 }
 
 func (a *Auth) GetAuthID() int {
-	return a.uid
+	return a.id
 }
 
 func (a *Auth) GetUser() *User {

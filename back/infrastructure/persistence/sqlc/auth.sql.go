@@ -12,39 +12,39 @@ import (
 )
 
 const findAuthById = `-- name: FindAuthById :one
-SELECT a.uid, userid, source, access_token, expires_in, refresh_token, rt_expires_in, u.uid, username, masterkey, b64salt, b64filekey FROM Auth a
-JOIN UserData u on u.uid = a.userId
-WHERE a.uid = $1
+SELECT a.id, user_id, source, access_token, expires_in, refresh_token, rt_expires_in, u.id, username, masterkey, b64salt, b64filekey FROM "Auth" a
+JOIN "User" u on u.id = a.userId
+WHERE a.id = $1
 LIMIT 1
 `
 
 type FindAuthByIdRow struct {
-	Uid          int32
-	Userid       int32
+	ID           int32
+	UserID       pgtype.Int4
 	Source       pgtype.Text
 	AccessToken  pgtype.Text
 	ExpiresIn    pgtype.Float8
 	RefreshToken pgtype.Text
 	RtExpiresIn  pgtype.Float8
-	Uid_2        int32
+	ID_2         int32
 	Username     string
 	Masterkey    pgtype.Text
 	B64salt      pgtype.Text
 	B64filekey   pgtype.Text
 }
 
-func (q *Queries) FindAuthById(ctx context.Context, uid int32) (FindAuthByIdRow, error) {
-	row := q.db.QueryRow(ctx, findAuthById, uid)
+func (q *Queries) FindAuthById(ctx context.Context, id int32) (FindAuthByIdRow, error) {
+	row := q.db.QueryRow(ctx, findAuthById, id)
 	var i FindAuthByIdRow
 	err := row.Scan(
-		&i.Uid,
-		&i.Userid,
+		&i.ID,
+		&i.UserID,
 		&i.Source,
 		&i.AccessToken,
 		&i.ExpiresIn,
 		&i.RefreshToken,
 		&i.RtExpiresIn,
-		&i.Uid_2,
+		&i.ID_2,
 		&i.Username,
 		&i.Masterkey,
 		&i.B64salt,
@@ -54,22 +54,22 @@ func (q *Queries) FindAuthById(ctx context.Context, uid int32) (FindAuthByIdRow,
 }
 
 const findAuthByUserId = `-- name: FindAuthByUserId :one
-SELECT uid, userid, source, access_token, expires_in, refresh_token, rt_expires_in FROM Auth
-WHERE userId = $1 AND source = $2
+SELECT id, user_id, source, access_token, expires_in, refresh_token, rt_expires_in FROM "Auth"
+WHERE user_id = $1 AND source = $2
 LIMIT 1
 `
 
 type FindAuthByUserIdParams struct {
-	Userid int32
+	UserID pgtype.Int4
 	Source pgtype.Text
 }
 
 func (q *Queries) FindAuthByUserId(ctx context.Context, arg FindAuthByUserIdParams) (Auth, error) {
-	row := q.db.QueryRow(ctx, findAuthByUserId, arg.Userid, arg.Source)
+	row := q.db.QueryRow(ctx, findAuthByUserId, arg.UserID, arg.Source)
 	var i Auth
 	err := row.Scan(
-		&i.Uid,
-		&i.Userid,
+		&i.ID,
+		&i.UserID,
 		&i.Source,
 		&i.AccessToken,
 		&i.ExpiresIn,
@@ -80,8 +80,8 @@ func (q *Queries) FindAuthByUserId(ctx context.Context, arg FindAuthByUserIdPara
 }
 
 const persistAuth = `-- name: PersistAuth :exec
-INSERT INTO Auth (
-    uid, userId, source, access_token, expires_in, refresh_token, rt_expires_in
+INSERT INTO "Auth" (
+    id, user_id, source, access_token, expires_in, refresh_token, rt_expires_in
 ) VALUES (
     $1, $2, $3, $4, $5, $6, $7
 )
@@ -89,8 +89,8 @@ ON CONFLICT DO NOTHING
 `
 
 type PersistAuthParams struct {
-	Uid          int32
-	Userid       int32
+	ID           int32
+	UserID       pgtype.Int4
 	Source       pgtype.Text
 	AccessToken  pgtype.Text
 	ExpiresIn    pgtype.Float8
@@ -100,8 +100,8 @@ type PersistAuthParams struct {
 
 func (q *Queries) PersistAuth(ctx context.Context, arg PersistAuthParams) error {
 	_, err := q.db.Exec(ctx, persistAuth,
-		arg.Uid,
-		arg.Userid,
+		arg.ID,
+		arg.UserID,
 		arg.Source,
 		arg.AccessToken,
 		arg.ExpiresIn,

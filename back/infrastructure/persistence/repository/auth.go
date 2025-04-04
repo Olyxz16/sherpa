@@ -22,8 +22,8 @@ func NewAuthRepository() *AuthRepository {
 
 func (r *AuthRepository) Persist(auth *model.Auth, ctx context.Context) error {
 	params := db.PersistAuthParams {
-		Uid: int32(auth.GetAuthID()),		
-		Userid: int32(auth.GetUser().GetID()),
+		ID: int32(auth.GetAuthID()),		
+        UserID: pgtype.Int4{Int32: int32(auth.GetUser().GetID()), Valid: true},
 		Source: pgtype.Text{String: string(auth.GetPlatormSource()), Valid: true},
 		AccessToken: pgtype.Text{String: auth.GetAccessToken(), Valid: true},
 		RefreshToken: pgtype.Text{String: auth.GetRefreshToken(), Valid: true},
@@ -40,14 +40,14 @@ func (r *AuthRepository) Find(id int, ctx context.Context) (*model.Auth, error) 
 		return nil, err
 	}
 	user := model.NewUser(	
-		int(data.Uid_2),
+		int(data.ID_2),
 		data.Username,
 		data.Masterkey.String,
 		data.B64salt.String,
 		data.B64filekey.String,
 	)
 	auth := model.NewAuth(
-		int(data.Uid),
+		int(data.ID),
 		user,
 		model.AuthSource(data.Source.String),
 		data.AccessToken.String,
@@ -60,7 +60,7 @@ func (r *AuthRepository) Find(id int, ctx context.Context) (*model.Auth, error) 
 
 func (r *AuthRepository) FindByUser(user *model.User, source model.AuthSource, ctx context.Context) (*model.Auth, error) {
 	params := db.FindAuthByUserIdParams {
-		Userid: int32(user.GetID()),	
+		UserID: pgtype.Int4{Int32: int32(user.GetID()), Valid: true},	
 		Source: pgtype.Text{String: string(source), Valid: true},
 	}
 	data, err := r.q.FindAuthByUserId(ctx, params)
@@ -68,7 +68,7 @@ func (r *AuthRepository) FindByUser(user *model.User, source model.AuthSource, c
 		return nil, err
 	}
 	auth := model.NewAuth(
-		int(data.Uid),
+		int(data.ID),
 		user,
 		model.AuthSource(data.Source.String),
 		data.AccessToken.String,

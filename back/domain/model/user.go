@@ -12,7 +12,7 @@ import (
 )
 
 type User struct {
-	uid				int
+	id				int
 	username		string
 	masterkey		string	
 	b64salt			string
@@ -21,16 +21,16 @@ type User struct {
 
 func CreateUser(username string) *User {
 	biguid, _ := rand.Int(rand.Reader, big.NewInt(math.MaxInt32))
-	uid := int(biguid.Int64())
+	id := int(biguid.Int64())
 	return &User{
-		uid: uid,
+		id: id,
 		username: username,
 	}	
 }
 
-func NewUser(uid int, username, masterkey, b64salt, b64filekey string) *User {
+func NewUser(id int, username, masterkey, b64salt, b64filekey string) *User {
 	return &User {
-		uid: uid,
+		id: id,
 		username: username,
 		masterkey: masterkey,
 		b64salt: b64salt,
@@ -39,7 +39,7 @@ func NewUser(uid int, username, masterkey, b64salt, b64filekey string) *User {
 }
 
 func (u *User) GetID() int {
-	return u.uid;
+	return u.id;
 }
 
 func (u *User) GetUsername() string {

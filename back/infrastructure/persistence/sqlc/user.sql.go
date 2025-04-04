@@ -12,15 +12,15 @@ import (
 )
 
 const findUser = `-- name: FindUser :one
-SELECT uid, username, masterkey, b64salt, b64filekey FROM UserData
-WHERE uid = $1 LIMIT 1
+SELECT id, username, masterkey, b64salt, b64filekey FROM "User"
+WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) FindUser(ctx context.Context, uid int32) (Userdatum, error) {
-	row := q.db.QueryRow(ctx, findUser, uid)
-	var i Userdatum
+func (q *Queries) FindUser(ctx context.Context, id int32) (User, error) {
+	row := q.db.QueryRow(ctx, findUser, id)
+	var i User
 	err := row.Scan(
-		&i.Uid,
+		&i.ID,
 		&i.Username,
 		&i.Masterkey,
 		&i.B64salt,
@@ -30,12 +30,12 @@ func (q *Queries) FindUser(ctx context.Context, uid int32) (Userdatum, error) {
 }
 
 const persistUser = `-- name: PersistUser :exec
-INSERT INTO UserData (
-    uid, username, masterkey, b64salt, b64filekey
+INSERT INTO "User" (
+    id, username, masterkey, b64salt, b64filekey
 ) VALUES (
     $1, $2, $3, $4, $5
 )
-ON CONFLICT (uid)
+ON CONFLICT (id)
 DO UPDATE SET
     username = EXCLUDED.username,
     masterkey = EXCLUDED.masterkey,
@@ -44,7 +44,7 @@ DO UPDATE SET
 `
 
 type PersistUserParams struct {
-	Uid        int32
+	ID         int32
 	Username   string
 	Masterkey  pgtype.Text
 	B64salt    pgtype.Text
@@ -53,7 +53,7 @@ type PersistUserParams struct {
 
 func (q *Queries) PersistUser(ctx context.Context, arg PersistUserParams) error {
 	_, err := q.db.Exec(ctx, persistUser,
-		arg.Uid,
+		arg.ID,
 		arg.Username,
 		arg.Masterkey,
 		arg.B64salt,
@@ -63,15 +63,15 @@ func (q *Queries) PersistUser(ctx context.Context, arg PersistUserParams) error 
 }
 
 const updateMasterkey = `-- name: UpdateMasterkey :exec
-UPDATE UserData
+UPDATE "User"
 SET masterkey=$2,
 b64salt=$3,
 b64filekey=$4
-WHERE uid=$1
+WHERE id=$1
 `
 
 type UpdateMasterkeyParams struct {
-	Uid        int32
+	ID         int32
 	Masterkey  pgtype.Text
 	B64salt    pgtype.Text
 	B64filekey pgtype.Text
@@ -79,7 +79,7 @@ type UpdateMasterkeyParams struct {
 
 func (q *Queries) UpdateMasterkey(ctx context.Context, arg UpdateMasterkeyParams) error {
 	_, err := q.db.Exec(ctx, updateMasterkey,
-		arg.Uid,
+		arg.ID,
 		arg.Masterkey,
 		arg.B64salt,
 		arg.B64filekey,

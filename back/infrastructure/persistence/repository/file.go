@@ -22,7 +22,7 @@ func NewFileRepository() *FileRepository {
 
 func (r *FileRepository) Persist(file *model.File, ctx context.Context) error {
 	params := db.PersistFileParams {
-		Ownerid: int32(file.GetOwner().GetID()),
+		OwnerID: int32(file.GetOwner().GetID()),
 		Source: string(file.GetSource()),
 		Reponame: file.GetReponame(),
 		Filename: file.GetFilename(),
@@ -35,7 +35,7 @@ func (r *FileRepository) Persist(file *model.File, ctx context.Context) error {
 
 func (r *FileRepository) Find(owner *model.User, source model.AuthSource, reponame, filename string, ctx context.Context) (*model.File, error) {
 	params := db.FindFileParams {
-		Ownerid: int32(owner.GetID()),
+		OwnerID: int32(owner.GetID()),
 		Source: string(source),
 		Reponame: reponame,
 		Filename: filename,
