@@ -20,8 +20,8 @@ LIMIT 1
 
 type FindAuthByIdRow struct {
 	ID           int32
-	UserID       pgtype.Int4
-	Source       pgtype.Text
+	UserID       int32
+	Source       string
 	AccessToken  pgtype.Text
 	ExpiresIn    pgtype.Float8
 	RefreshToken pgtype.Text
@@ -60,8 +60,8 @@ LIMIT 1
 `
 
 type FindAuthByUserIdParams struct {
-	UserID pgtype.Int4
-	Source pgtype.Text
+	UserID int32
+	Source string
 }
 
 func (q *Queries) FindAuthByUserId(ctx context.Context, arg FindAuthByUserIdParams) (Auth, error) {
@@ -82,16 +82,21 @@ func (q *Queries) FindAuthByUserId(ctx context.Context, arg FindAuthByUserIdPara
 const persistAuth = `-- name: PersistAuth :exec
 INSERT INTO "Auth" (
     id, user_id, source, access_token, expires_in, refresh_token, rt_expires_in
-) VALUES (
+    ) VALUES (
     $1, $2, $3, $4, $5, $6, $7
-)
-ON CONFLICT DO NOTHING
+    )
+    ON CONFLICT (user_id, source)
+    DO UPDATE SET
+        access_token = EXCLUDED.access_token,
+        expires_in = EXCLUDED.expires_in,
+        refresh_token = EXCLUDED.refresh_token,
+        rt_expires_in = EXCLUDED.rt_expires_in
 `
 
 type PersistAuthParams struct {
 	ID           int32
-	UserID       pgtype.Int4
-	Source       pgtype.Text
+	UserID       int32
+	Source       string
 	AccessToken  pgtype.Text
 	ExpiresIn    pgtype.Float8
 	RefreshToken pgtype.Text

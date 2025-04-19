@@ -10,8 +10,8 @@ import (
 
 type Auth struct {
 	ID           int32
-	UserID       pgtype.Int4
-	Source       pgtype.Text
+	UserID       int32
+	Source       string
 	AccessToken  pgtype.Text
 	ExpiresIn    pgtype.Float8
 	RefreshToken pgtype.Text

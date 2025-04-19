@@ -8,3 +8,4 @@ sql:
         package: "db"
         out: "infrastructure/persistence/sqlc"
         sql_package: "pgx/v5"
+        sql_driver: "github.com/jackc/pgx/v5"

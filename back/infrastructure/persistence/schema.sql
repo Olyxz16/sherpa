@@ -7,14 +7,16 @@ CREATE TABLE IF NOT EXISTS "User" (
 );
 
 CREATE TABLE IF NOT EXISTS "Auth" (
-    id SERIAL PRIMARY KEY,
+    id SERIAL UNIQUE,
     user_id INT REFERENCES "User" (id),
     source VARCHAR(255),
     access_token VARCHAR(255),
     expires_in FLOAT,
     refresh_token VARCHAR(255),
-    rt_expires_in FLOAT
+    rt_expires_in FLOAT,
+    PRIMARY KEY (id, user_id, source)
 );
+CREATE UNIQUE INDEX index_userid_source ON "Auth"(user_id, source);
 
 CREATE TABLE IF NOT EXISTS "File" (
     owner_id INT REFERENCES "User" (id),
