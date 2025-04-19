@@ -117,7 +117,7 @@ func TestCreateAuthWithConcurrentUser(t *testing.T) {
     persistence.New(config) 
     ctx := context.Background()
 
-    authId := 98765123
+    authId := 98765124
     source := model.Github
 
     userRepo := NewUserRepository()
