@@ -1,0 +1,6 @@
+FROM arigaio/atlas:0.32.0-alpine
+
+COPY ./infrastructure/persistence/migrations /migrations
+
+ENTRYPOINT [ "sh", "-c" ]
+CMD [ "atlas migrate apply --dir file:///migrations --url ${DATABASE_URL}" ]
