@@ -4,7 +4,7 @@ go 1.23.0
 
 toolchain go1.23.8
 
-require github.com/jackc/pgx/v5 v5.7.2 // direct
+require github.com/jackc/pgx/v5 v5.7.4 // direct
 
 require (
 	github.com/caarlos0/env v3.5.0+incompatible
