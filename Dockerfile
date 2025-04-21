@@ -1,8 +1,8 @@
 FROM node:23 AS build-front
 
-COPY front/package.json front/package-lock.json ./
+COPY views/package.json views/package-lock.json ./
 RUN npm i
-COPY front/ ./
+COPY views/ ./
 RUN npm run build
 
 
@@ -21,11 +21,11 @@ RUN adduser \
 
 WORKDIR /go/app
 
-COPY back/go.mod back/go.sum ./
+COPY go.mod go.sum ./
 RUN go mod download
 RUN go mod verify
 
-COPY back/ ./
+COPY . ./
 COPY --from=build-front /dist/ ./cmd/server/static/
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags='-w -s -extldflags "-static"' -a -o /build/main cmd/server/main.go
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags='-w -s -extldflags "-static"' -a -o /build/healthcheck cmd/healthcheck/main.go
