@@ -1,7 +1,10 @@
 services:
 
   server:
-    image: ghcr.io/olyxz16/sherpa/server:latest
+    image: server
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
     environment:
       HOST: ${HOST}
       PORT: 8080
@@ -28,7 +31,10 @@ services:
       timeout: 10s
 
   migrate:
-    image: ghcr.io/olyxz16/sherpa/migrations:latest
+    image: migrate
+    build:
+      context: ./back
+      dockerfile: ./Dockerfile.migrate
     environment:
       DATABASE_URL: postgres://${DB_USERNAME}:${DB_PASSWORD}@psql:5432/${DB_DATABASE}?sslmode=disable&search_path=public
     depends_on:
