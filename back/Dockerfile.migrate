@@ -1,5 +1,7 @@
 FROM arigaio/atlas:0.32.0-alpine
 
+LABEL org.opencontainers.image.source=https://github.com/Olyxz16/sherpa
+
 COPY ./infrastructure/persistence/migrations /migrations
 
 ENTRYPOINT [ "sh", "-c" ]

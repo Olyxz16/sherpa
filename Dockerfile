@@ -33,6 +33,8 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags='-w -s -extldflags "
 
 FROM scratch 
 
+LABEL org.opencontainers.image.source=https://github.com/Olyxz16/sherpa
+
 ENV PORT=8080
 EXPOSE 8080
 
