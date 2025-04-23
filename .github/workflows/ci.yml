@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - 'master'
+  pull_request:
+    branches:
+      - 'master'
+
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      DB_DATABASE: sherpa
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+    services:
+      postgres:
+        image: postgres
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: sherpa
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+      - name: "Migrate database"
+        run: |
+          curl -sSf https://atlasgo.sh | sh
+          atlas migrate hash --dir file://infrastructure/persistence/migrations
+          atlas migrate apply --dir file://infrastructure/persistence/migrations --url postgres://postgres:postgres@127.0.0.1:5432/sherpa?sslmode=disable
+      - name: "Setup go"
+        uses: actions/setup-go@v5
+        with:
+          go-version: '^1.23.0'
+      - run: |
+          mkdir -p cmd/server/static && touch "$_"/index.html
+          go test ./...
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: https://ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Upload server artifact"
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: ghcr.io/olyxz16/sherpa/server:latest
+      - name: "Upload migration artifact"
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.migrate
+          push: true
+          tags: ghcr.io/olyxz16/sherpa/migrations:latest
