@@ -4,5 +4,8 @@ LABEL org.opencontainers.image.source=https://github.com/Olyxz16/sherpa
 
 COPY ./infrastructure/persistence/migrations /migrations
 
+# Temporary, fixes atlas checksum issues
+RUN atlas migrate hash --dir file:///migrations
+
 ENTRYPOINT [ "sh", "-c" ]
 CMD [ "atlas migrate apply --dir file:///migrations --url ${DATABASE_URL}" ]
