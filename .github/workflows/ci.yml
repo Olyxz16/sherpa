@@ -77,3 +77,10 @@ jobs:
           file: Dockerfile.migrate
           push: true
           tags: ghcr.io/olyxz16/sherpa/migrations:latest
+      - name: "Deploy with webhook"
+        shell: bash
+        env: 
+          SHERPA_WEBHOOK: ${{ secrets.SHERPA_WEBHOOK }}
+          SHERPA_TOKEN: ${{ secrets.SHERPA_TOKEN }}
+        run: |
+          curl -H "authorization: Bearer $SHERPA_TOKEN" "$SHERPA_WEBHOOK"
