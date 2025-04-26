@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "npx run-s type-check tailwind-build build-only",
-    "build-dev": "npx run-s tailwind-build && vite build --emptyOutDir true --outDir ../back/cmd/server/static/",
+    "build-dev": "npx run-s tailwind-build && vite build --emptyOutDir true --outDir ../cmd/server/static/",
     "tailwind-build": "npx tailwindcss -i src/assets/main.css -o src/assets/output.css --minify",
     "tailwind": "npx tailwindcss -i src/assets/main.css -o src/assets/output.css --watch",
     "preview": "vite preview",
